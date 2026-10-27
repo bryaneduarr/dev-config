@@ -1,0 +1,12 @@
+[mgr]
+show_hidden = true
+
+[[plugin.prepend_fetchers]]
+url = "*"
+group = "git"
+run = "git"
+
+[[plugin.prepend_fetchers]]
+url = "*/"
+group = "git"
+run = "git"

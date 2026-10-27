@@ -1,0 +1,15 @@
+{
+  "installMode": "off",
+  "warmup": true,
+  "servers": {
+    "vtsls": {
+      "install": {
+        "type": "system",
+        "command": [
+          "vtsls",
+          "--stdio"
+        ]
+      }
+    }
+  }
+}

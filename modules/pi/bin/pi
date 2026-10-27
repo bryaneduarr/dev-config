@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly data_dir="${DEV_CONFIG_DATA_DIR:-$HOME/.local/share/dev-config}"
+readonly pi_executable="$HOME/.pi/agent/npm/node_modules/.bin/pi"
+
+export PATH="$data_dir/node/bin:$data_dir/tools/bin:$PATH"
+export PI_FFF_MODE=override
+export FFF_ENABLE_ROOT_SCAN=0
+export FFF_ENABLE_HOME_SCAN=0
+export POWERLINE_NERD_FONTS=0
+
+exec "$pi_executable" "$@"
