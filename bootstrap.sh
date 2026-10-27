@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Prepares a fresh Ubuntu machine: updates the system, installs the basics,
-# creates a user only if root is the sole account, and installs and tests Docker. Run as root; safe to re-run.
+# creates a user only if root is the sole account, installs the GitHub CLI, and installs and tests Docker.
+# Run as root; safe to re-run.
 set -euo pipefail
 
 username="${BOOTSTRAP_USER:-}"
 readonly docker_repository="https://download.docker.com/linux/ubuntu"
+readonly github_cli_repository="https://cli.github.com/packages"
 readonly -a basic_packages=(
   ca-certificates curl wget gnupg git sudo build-essential unzip zip
   openssh-server software-properties-common unattended-upgrades
@@ -99,6 +101,25 @@ create_user() {
   fi
 }
 
+install_github_cli() {
+  log "Installing the GitHub CLI from the official repository"
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL "$github_cli_repository/githubcli-archive-keyring.gpg" -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
+  chmod a+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+  cat >/etc/apt/sources.list.d/github-cli.sources <<SOURCES
+Types: deb
+URIs: $github_cli_repository
+Suites: stable
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+SOURCES
+
+  apt-get update
+  apt-get install -y gh
+  gh --version | head -n 1
+}
+
 install_docker() {
   log "Installing Docker Engine from the official repository"
   curl -fsSI "$docker_repository/dists/$codename/Release" >/dev/null ||
@@ -138,9 +159,10 @@ main() {
   ask_username
   update_system
   create_user
+  install_github_cli
   install_docker
   test_docker
-  log "Done. Log in as $username (log out and back in once so the docker group applies)"
+  log "Done. Log in as $username (log out and back in once so the docker group applies), then run: gh auth login"
   [ ! -e /var/run/reboot-required ] || warn "a reboot is required: sudo reboot"
 }
 
