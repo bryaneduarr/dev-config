@@ -1,0 +1,153 @@
+diff --git a/bootstrap.sh b/bootstrap.sh
+index 7ce980d..fd49aae 100755
+--- a/bootstrap.sh
++++ b/bootstrap.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ # Prepares a fresh Ubuntu machine: updates the system, installs the basics,
+-# creates the user, and installs and tests Docker. Run as root; safe to re-run.
++# creates a user only if root is the sole account, and installs and tests Docker. Run as root; safe to re-run.
+ set -euo pipefail
+ 
+ username="${BOOTSTRAP_USER:-}"
+@@ -40,10 +40,31 @@ update_system() {
+ # Reads from /dev/tty so the prompt also works when the script is piped into bash over SSH.
+ has_terminal() { [ -r /dev/tty ] && : </dev/tty 2>/dev/null; }
+ 
++# Human accounts other than root: UID in the normal range with a real login shell.
++existing_users() {
++  awk -F: '$3 >= 1000 && $3 < 60000 && $7 !~ /(nologin|false)$/ { print $1 }' /etc/passwd
++}
++
++# Only asks for a new username when root is the machine's only user.
+ ask_username() {
+   if [ -z "$username" ]; then
+-    has_terminal || fail "no terminal to ask for the username; set BOOTSTRAP_USER=<name>"
+-    read -rp "Username to create for this machine: " username </dev/tty
++    local -a users
++    mapfile -t users < <(existing_users)
++    case "${#users[@]}" in
++      0)
++        has_terminal || fail "no terminal to ask for the username; set BOOTSTRAP_USER=<name>"
++        read -rp "Username to create for this machine: " username </dev/tty
++        ;;
++      1)
++        username="${users[0]}"
++        log "Using existing user $username"
++        ;;
++      *)
++        has_terminal || fail "several users exist (${users[*]}); set BOOTSTRAP_USER=<name>"
++        log "Existing users: ${users[*]}"
++        read -rp "Which user should get Docker access? " username </dev/tty
++        ;;
++    esac
+   fi
+   [[ "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || fail "invalid username: '$username'"
+   readonly username
+@@ -51,11 +72,11 @@ ask_username() {
+ 
+ create_user() {
+   if id "$username" >/dev/null 2>&1; then
+-    log "User $username already exists"
+-  else
+-    log "Creating user $username"
+-    adduser --disabled-password --gecos "" "$username"
++    log "User $username already exists; leaving the account as is"
++    return
+   fi
++  log "Creating user $username"
++  adduser --disabled-password --gecos "" "$username"
+   usermod -aG sudo "$username"
+ 
+   if has_terminal && [ -z "$(passwd -S "$username" | awk '$2 == "P"')" ]; then
+@@ -106,7 +127,7 @@ test_docker() {
+   log "Testing Docker as root"
+   docker run --rm hello-world | grep -q "Hello from Docker!" || fail "Docker test failed"
+   log "Testing Docker as $username"
+-  sudo -u "$username" sg docker -c "docker run --rm hello-world" | grep -q "Hello from Docker!" ||
++  sudo -u "$username" -g docker docker run --rm hello-world | grep -q "Hello from Docker!" ||
+     fail "Docker test failed for $username"
+   docker --version
+   docker compose version
+diff --git a/lib/common.sh b/lib/common.sh
+index ae63b88..b3312d2 100644
+--- a/lib/common.sh
++++ b/lib/common.sh
+@@ -6,6 +6,8 @@ readonly node_dir="$data_dir/node"
+ readonly tools_dir="$data_dir/tools"
+ readonly local_bin_dir="$HOME/.local/bin"
+ readonly required_node_major=24
++readonly required_zig_version=0.16.0
++readonly zig_dir="$data_dir/zig"
+ 
+ log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+ warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
+@@ -90,6 +92,36 @@ link_node_commands() {
+   done
+ }
+ 
++# Herdr's vendored libghostty-vt only builds with this exact Zig version.
++ensure_zig() {
++  if [ -x "$zig_dir/zig" ] && [ "$("$zig_dir/zig" version)" = "$required_zig_version" ]; then
++    log "Zig $required_zig_version already installed in $zig_dir"
++    link_into_local_bin "$zig_dir/zig" zig
++    return
++  fi
++
++  local architecture index_url work_dir tarball_url expected_sha
++  architecture="$(github_release_architecture)-linux"
++  index_url="https://ziglang.org/download/index.json"
++  work_dir="$(mktemp -d)"
++
++  apt_install_missing jq:jq xz:xz-utils
++  log "Downloading Zig $required_zig_version ($architecture)"
++  curl -fsSL "$index_url" -o "$work_dir/index.json"
++  tarball_url="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].tarball // empty' "$work_dir/index.json")"
++  expected_sha="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].shasum // empty' "$work_dir/index.json")"
++  [ -n "$tarball_url" ] && [ -n "$expected_sha" ] || fail "no Zig $required_zig_version download for $architecture"
++  curl -fsSL "$tarball_url" -o "$work_dir/zig.tar.xz"
++  printf '%s  %s\n' "$expected_sha" "$work_dir/zig.tar.xz" | sha256sum --check --status \
++    || fail "checksum mismatch for the Zig download"
++
++  rm -rf "$zig_dir"
++  mkdir -p "$zig_dir"
++  tar -xJf "$work_dir/zig.tar.xz" -C "$zig_dir" --strip-components=1
++  rm -rf "$work_dir"
++  link_into_local_bin "$zig_dir/zig" zig
++}
++
+ install_global_npm_tools() {
+   log "Installing npm tools into $tools_dir: $*"
+   npm install --global --prefix "$tools_dir" --allow-scripts=@ast-grep/cli --no-audit --no-fund "$@"
+diff --git a/modules/herdr/install.sh b/modules/herdr/install.sh
+index 9651dc8..52aa361 100755
+--- a/modules/herdr/install.sh
++++ b/modules/herdr/install.sh
+@@ -11,22 +11,24 @@ readonly config_dir="$HOME/.config/herdr"
+ source "$repository_dir/lib/common.sh"
+ 
+ # Upstream Herdr has no tab bar toggle, so build it with patches/toggle-tab-bar.patch.
+-build_patched_herdr() {
++# Runs in a subshell so its cleanup trap cannot leak into the rest of the installer.
++build_patched_herdr() (
+   local build_dir
+   build_dir="$(mktemp -d)"
+-  trap 'rm -rf "$build_dir"' RETURN
++  trap 'rm -rf "$build_dir"' EXIT
+   apt_install_missing cc:build-essential pkg-config:pkg-config
+   if ! has_command cargo && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+     log "Installing the Rust toolchain with rustup"
+     curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
+   fi
+   export PATH="$HOME/.cargo/bin:$PATH"
++  ensure_zig
+   log "Building Herdr $herdr_version with the tab bar toggle patch"
+   git clone -q --depth 1 --branch "$herdr_version" "$source_url" "$build_dir/herdr"
+   git -C "$build_dir/herdr" apply "$module_dir/patches/toggle-tab-bar.patch"
+   (cd "$build_dir/herdr" && cargo build --release --locked)
+   install -m 755 "$build_dir/herdr/target/release/herdr" "$local_bin_dir/herdr"
+-}
++)
+ 
+ main() {
+   prepare_environment

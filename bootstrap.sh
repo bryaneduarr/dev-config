@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prepares a fresh Ubuntu machine: updates the system, installs the basics,
-# creates the user, and installs and tests Docker. Run as root; safe to re-run.
+# creates a user only if root is the sole account, and installs and tests Docker. Run as root; safe to re-run.
 set -euo pipefail
 
 username="${BOOTSTRAP_USER:-}"
@@ -40,10 +40,31 @@ update_system() {
 # Reads from /dev/tty so the prompt also works when the script is piped into bash over SSH.
 has_terminal() { [ -r /dev/tty ] && : </dev/tty 2>/dev/null; }
 
+# Human accounts other than root: UID in the normal range with a real login shell.
+existing_users() {
+  awk -F: '$3 >= 1000 && $3 < 60000 && $7 !~ /(nologin|false)$/ { print $1 }' /etc/passwd
+}
+
+# Only asks for a new username when root is the machine's only user.
 ask_username() {
   if [ -z "$username" ]; then
-    has_terminal || fail "no terminal to ask for the username; set BOOTSTRAP_USER=<name>"
-    read -rp "Username to create for this machine: " username </dev/tty
+    local -a users
+    mapfile -t users < <(existing_users)
+    case "${#users[@]}" in
+      0)
+        has_terminal || fail "no terminal to ask for the username; set BOOTSTRAP_USER=<name>"
+        read -rp "Username to create for this machine: " username </dev/tty
+        ;;
+      1)
+        username="${users[0]}"
+        log "Using existing user $username"
+        ;;
+      *)
+        has_terminal || fail "several users exist (${users[*]}); set BOOTSTRAP_USER=<name>"
+        log "Existing users: ${users[*]}"
+        read -rp "Which user should get Docker access? " username </dev/tty
+        ;;
+    esac
   fi
   [[ "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || fail "invalid username: '$username'"
   readonly username
@@ -51,11 +72,11 @@ ask_username() {
 
 create_user() {
   if id "$username" >/dev/null 2>&1; then
-    log "User $username already exists"
-  else
-    log "Creating user $username"
-    adduser --disabled-password --gecos "" "$username"
+    log "User $username already exists; leaving the account as is"
+    return
   fi
+  log "Creating user $username"
+  adduser --disabled-password --gecos "" "$username"
   usermod -aG sudo "$username"
 
   if has_terminal && [ -z "$(passwd -S "$username" | awk '$2 == "P"')" ]; then
@@ -106,7 +127,7 @@ test_docker() {
   log "Testing Docker as root"
   docker run --rm hello-world | grep -q "Hello from Docker!" || fail "Docker test failed"
   log "Testing Docker as $username"
-  sudo -u "$username" sg docker -c "docker run --rm hello-world" | grep -q "Hello from Docker!" ||
+  sudo -u "$username" -g docker docker run --rm hello-world | grep -q "Hello from Docker!" ||
     fail "Docker test failed for $username"
   docker --version
   docker compose version

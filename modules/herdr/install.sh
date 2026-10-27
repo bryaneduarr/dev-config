@@ -11,22 +11,24 @@ readonly config_dir="$HOME/.config/herdr"
 source "$repository_dir/lib/common.sh"
 
 # Upstream Herdr has no tab bar toggle, so build it with patches/toggle-tab-bar.patch.
-build_patched_herdr() {
+# Runs in a subshell so its cleanup trap cannot leak into the rest of the installer.
+build_patched_herdr() (
   local build_dir
   build_dir="$(mktemp -d)"
-  trap 'rm -rf "$build_dir"' RETURN
+  trap 'rm -rf "$build_dir"' EXIT
   apt_install_missing cc:build-essential pkg-config:pkg-config
   if ! has_command cargo && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
     log "Installing the Rust toolchain with rustup"
     curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
   fi
   export PATH="$HOME/.cargo/bin:$PATH"
+  ensure_zig
   log "Building Herdr $herdr_version with the tab bar toggle patch"
   git clone -q --depth 1 --branch "$herdr_version" "$source_url" "$build_dir/herdr"
   git -C "$build_dir/herdr" apply "$module_dir/patches/toggle-tab-bar.patch"
   (cd "$build_dir/herdr" && cargo build --release --locked)
   install -m 755 "$build_dir/herdr/target/release/herdr" "$local_bin_dir/herdr"
-}
+)
 
 main() {
   prepare_environment

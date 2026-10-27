@@ -6,6 +6,8 @@ readonly node_dir="$data_dir/node"
 readonly tools_dir="$data_dir/tools"
 readonly local_bin_dir="$HOME/.local/bin"
 readonly required_node_major=24
+readonly required_zig_version=0.16.0
+readonly zig_dir="$data_dir/zig"
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
@@ -88,6 +90,36 @@ link_node_commands() {
   for command_name in node npm npx; do
     link_into_local_bin "$node_dir/bin/$command_name" "$command_name"
   done
+}
+
+# Herdr's vendored libghostty-vt only builds with this exact Zig version.
+ensure_zig() {
+  if [ -x "$zig_dir/zig" ] && [ "$("$zig_dir/zig" version)" = "$required_zig_version" ]; then
+    log "Zig $required_zig_version already installed in $zig_dir"
+    link_into_local_bin "$zig_dir/zig" zig
+    return
+  fi
+
+  local architecture index_url work_dir tarball_url expected_sha
+  architecture="$(github_release_architecture)-linux"
+  index_url="https://ziglang.org/download/index.json"
+  work_dir="$(mktemp -d)"
+
+  apt_install_missing jq:jq xz:xz-utils
+  log "Downloading Zig $required_zig_version ($architecture)"
+  curl -fsSL "$index_url" -o "$work_dir/index.json"
+  tarball_url="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].tarball // empty' "$work_dir/index.json")"
+  expected_sha="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].shasum // empty' "$work_dir/index.json")"
+  [ -n "$tarball_url" ] && [ -n "$expected_sha" ] || fail "no Zig $required_zig_version download for $architecture"
+  curl -fsSL "$tarball_url" -o "$work_dir/zig.tar.xz"
+  printf '%s  %s\n' "$expected_sha" "$work_dir/zig.tar.xz" | sha256sum --check --status \
+    || fail "checksum mismatch for the Zig download"
+
+  rm -rf "$zig_dir"
+  mkdir -p "$zig_dir"
+  tar -xJf "$work_dir/zig.tar.xz" -C "$zig_dir" --strip-components=1
+  rm -rf "$work_dir"
+  link_into_local_bin "$zig_dir/zig" zig
 }
 
 install_global_npm_tools() {
