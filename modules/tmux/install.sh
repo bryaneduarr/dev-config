@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly repository_dir="$(cd "$module_dir/../.." && pwd)"
+module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly module_dir
+repository_dir="$(cd "$module_dir/../.." && pwd)"
+readonly repository_dir
 readonly config_dir="$HOME/.config/tmux"
 readonly tpm_dir="$HOME/.tmux/plugins/tpm"
 readonly tpm_repository="https://github.com/tmux-plugins/tpm"

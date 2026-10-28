@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly repository_dir="$(cd "$module_dir/../.." && pwd)"
+module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly module_dir
+repository_dir="$(cd "$module_dir/../.." && pwd)"
+readonly repository_dir
 readonly web_research_dir="$HOME/.config/dev-config/web-research"
 readonly pi_agent_dir="$HOME/.pi/agent"
 readonly pi_packages_dir="$pi_agent_dir/npm"
@@ -32,7 +34,7 @@ docker_command() {
 
 write_secret_file() {
   local file="$1" variable="$2"
-  [ -s "$file" ] || printf '%s=%s\n' "$variable" "$(head -c 32 /dev/urandom | xxd -p -c 64)" > "$file"
+  [ -s "$file" ] || printf '%s=%s\n' "$variable" "$(head -c 32 /dev/urandom | xxd -p -c 64)" >"$file"
   chmod 600 "$file"
 }
 
@@ -53,7 +55,7 @@ install_web_research() {
 
   local searx_secret
   searx_secret="$(sed -n 's/^SEARX_SECRET_KEY=//p' "$web_research_dir/searx.env")"
-  cat > "$web_research_dir/searxng-settings.yml" <<SETTINGS
+  cat >"$web_research_dir/searxng-settings.yml" <<SETTINGS
 use_default_settings: true
 search:
   formats:

@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly repository_dir="$(cd "$module_dir/../.." && pwd)"
+module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly module_dir
+repository_dir="$(cd "$module_dir/../.." && pwd)"
+readonly repository_dir
 readonly source_url="https://github.com/herdrdev/herdr"
 readonly herdr_version="v0.9.5"
 readonly config_dir="$HOME/.config/herdr"
+readonly cargo_bin_dir="$HOME/.cargo/bin"
 
 # shellcheck source=lib/common.sh
 source "$repository_dir/lib/common.sh"
 
-# Upstream Herdr has no tab bar toggle, so build it with patches/toggle-tab-bar.patch.
 # Runs in a subshell so its cleanup trap cannot leak into the rest of the installer.
 build_patched_herdr() (
   local build_dir
   build_dir="$(mktemp -d)"
   trap 'rm -rf "$build_dir"' EXIT
   apt_install_missing cc:build-essential pkg-config:pkg-config
-  if ! has_command cargo && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+  if ! has_command cargo && [ ! -x "$cargo_bin_dir/cargo" ]; then
     log "Installing the Rust toolchain with rustup"
     curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
   fi
-  export PATH="$HOME/.cargo/bin:$PATH"
+  export PATH="$cargo_bin_dir:$PATH"
   ensure_zig
   log "Building Herdr $herdr_version with the tab bar toggle patch"
   git clone -q --depth 1 --branch "$herdr_version" "$source_url" "$build_dir/herdr"
