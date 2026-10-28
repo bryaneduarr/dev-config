@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["rule-audit.ts", "**/*.test.ts"],
+  "project": ["**/*.ts"],
+  "ignoreBinaries": ["tsc", "biome"]
+}
