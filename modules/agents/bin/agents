@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly data_dir="${DEV_CONFIG_DATA_DIR:-$HOME/.local/share/dev-config}"
+readonly entry_point="$data_dir/agents/agents.ts"
+
+export PATH="$data_dir/node/bin:$PATH"
+export NODE_OPTIONS="--disable-warning=ExperimentalWarning ${NODE_OPTIONS:-}"
+
+exec node "$entry_point" "$@"
