@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly repository_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly -a all_modules=(herdr tmux yazi neovim pi)
+repository_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly repository_dir
+readonly -a all_modules=(herdr tmux yazi neovim pi agents bash rule-audit check-code)
 
 # shellcheck source=lib/common.sh
 source "$repository_dir/lib/common.sh"
@@ -22,12 +23,18 @@ is_known_module() {
 
 main() {
   local -a requested=("$@")
-  [ "${#requested[@]}" -gt 0 ] || { usage; exit 1; }
+  [ "${#requested[@]}" -gt 0 ] || {
+    usage
+    exit 1
+  }
   [ "${requested[0]}" != all ] || requested=("${all_modules[@]}")
 
   local module
   for module in "${requested[@]}"; do
-    is_known_module "$module" || { usage; fail "unknown module: $module"; }
+    is_known_module "$module" || {
+      usage
+      fail "unknown module: $module"
+    }
   done
   for module in "${requested[@]}"; do
     log "Module: $module"
