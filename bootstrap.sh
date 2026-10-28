@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
-# Prepares a fresh Ubuntu machine: updates the system, installs the basics,
-# creates a user only if root is the sole account, installs the GitHub CLI, and installs and tests Docker.
-# Run as root; safe to re-run.
 set -euo pipefail
 
 username="${BOOTSTRAP_USER:-}"
+readonly keyrings_dir=/etc/apt/keyrings
 readonly docker_repository="https://download.docker.com/linux/ubuntu"
 readonly github_cli_repository="https://cli.github.com/packages"
+readonly docker_test_output="Hello from Docker!"
 readonly -a basic_packages=(
   ca-certificates curl wget gnupg git sudo build-essential unzip zip
   openssh-server software-properties-common unattended-upgrades
-  vim htop jq tmux ufw
+  vim htop btop fastfetch jq tmux ufw
 )
 readonly -a docker_packages=(docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin)
 readonly -a conflicting_packages=(docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc)
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
-fail() { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
+fail() {
+  printf '\033[1;31merror:\033[0m %s\n' "$*" >&2
+  exit 1
+}
 
 require_ubuntu_root() {
   [ "$(id -u)" -eq 0 ] || fail "run as root: sudo ./bootstrap.sh"
@@ -35,19 +37,17 @@ update_system() {
   apt-get -y full-upgrade
   log "Installing basic packages"
   apt-get install -y "${basic_packages[@]}"
+  # The ssh unit may be missing or unmanaged, as on WSL without systemd.
   systemctl enable --now ssh >/dev/null 2>&1 || true
   apt-get -y autoremove
 }
 
-# Reads from /dev/tty so the prompt also works when the script is piped into bash over SSH.
 has_terminal() { [ -r /dev/tty ] && : </dev/tty 2>/dev/null; }
 
-# Human accounts other than root: UID in the normal range with a real login shell.
 existing_users() {
   awk -F: '$3 >= 1000 && $3 < 60000 && $7 !~ /(nologin|false)$/ { print $1 }' /etc/passwd
 }
 
-# Only asks for a new username when root is the machine's only user.
 ask_username() {
   if [ -z "$username" ]; then
     local -a users
@@ -91,28 +91,29 @@ create_user() {
   fi
 
   # Reuse the SSH keys the machine was provisioned with so the new user can log in.
+  local user_keys="/home/$username/.ssh/authorized_keys"
   if [ -s /root/.ssh/authorized_keys ]; then
     install -d -m 700 -o "$username" -g "$username" "/home/$username/.ssh"
-    touch "/home/$username/.ssh/authorized_keys"
-    cat /root/.ssh/authorized_keys >>"/home/$username/.ssh/authorized_keys"
-    sort -u -o "/home/$username/.ssh/authorized_keys" "/home/$username/.ssh/authorized_keys"
-    chown "$username:$username" "/home/$username/.ssh/authorized_keys"
-    chmod 600 "/home/$username/.ssh/authorized_keys"
+    touch "$user_keys"
+    cat /root/.ssh/authorized_keys >>"$user_keys"
+    sort -u -o "$user_keys" "$user_keys"
+    chown "$username:$username" "$user_keys"
+    chmod 600 "$user_keys"
   fi
 }
 
 install_github_cli() {
   log "Installing the GitHub CLI from the official repository"
-  install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL "$github_cli_repository/githubcli-archive-keyring.gpg" -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
-  chmod a+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+  install -m 0755 -d "$keyrings_dir"
+  curl -fsSL "$github_cli_repository/githubcli-archive-keyring.gpg" -o "$keyrings_dir/githubcli-archive-keyring.gpg"
+  chmod a+r "$keyrings_dir/githubcli-archive-keyring.gpg"
   cat >/etc/apt/sources.list.d/github-cli.sources <<SOURCES
 Types: deb
 URIs: $github_cli_repository
 Suites: stable
 Components: main
 Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+Signed-By: $keyrings_dir/githubcli-archive-keyring.gpg
 SOURCES
 
   apt-get update
@@ -124,18 +125,19 @@ install_docker() {
   log "Installing Docker Engine from the official repository"
   curl -fsSI "$docker_repository/dists/$codename/Release" >/dev/null ||
     fail "Docker has no repository for '$codename' yet; re-run with DOCKER_SUITE=<older codename>, e.g. noble"
+  # Most conflicting packages are not installed, which makes apt-get remove fail.
   apt-get remove -y "${conflicting_packages[@]}" >/dev/null 2>&1 || true
 
-  install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL "$docker_repository/gpg" -o /etc/apt/keyrings/docker.asc
-  chmod a+r /etc/apt/keyrings/docker.asc
+  install -m 0755 -d "$keyrings_dir"
+  curl -fsSL "$docker_repository/gpg" -o "$keyrings_dir/docker.asc"
+  chmod a+r "$keyrings_dir/docker.asc"
   cat >/etc/apt/sources.list.d/docker.sources <<SOURCES
 Types: deb
 URIs: $docker_repository
 Suites: $codename
 Components: stable
 Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/docker.asc
+Signed-By: $keyrings_dir/docker.asc
 SOURCES
 
   apt-get update
@@ -146,9 +148,9 @@ SOURCES
 
 test_docker() {
   log "Testing Docker as root"
-  docker run --rm hello-world | grep -q "Hello from Docker!" || fail "Docker test failed"
+  docker run --rm hello-world | grep -q "$docker_test_output" || fail "Docker test failed"
   log "Testing Docker as $username"
-  sudo -u "$username" -g docker docker run --rm hello-world | grep -q "Hello from Docker!" ||
+  sudo -u "$username" -g docker docker run --rm hello-world | grep -q "$docker_test_output" ||
     fail "Docker test failed for $username"
   docker --version
   docker compose version
