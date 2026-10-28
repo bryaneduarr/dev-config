@@ -109,7 +109,7 @@ ensure_zig() {
 
 install_global_npm_tools() {
   log "Installing npm tools into $tools_dir: $*"
-  npm install --global --prefix "$tools_dir" --allow-scripts=@ast-grep/cli --no-audit --no-fund "$@"
+  npm install --global --prefix "$tools_dir" --allow-scripts=@ast-grep/cli --allow-scripts=bun --no-audit --no-fund "$@"
 }
 
 run_module() {
