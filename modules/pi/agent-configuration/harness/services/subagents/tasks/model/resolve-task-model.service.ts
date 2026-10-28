@@ -12,8 +12,10 @@ function unknownModelHint(runtime: ModelRuntime, provider: string): string {
 }
 
 function requestedModelOrThrow(runtime: ModelRuntime, requestedModel: string): TaskModel {
-  const [provider = "", ...modelParts] = requestedModel.split("/");
-  const model = runtime.getModel(provider, modelParts.join("/"));
+  const separatorIndex = requestedModel.indexOf("/");
+  const hasProvider = separatorIndex !== -1;
+  const provider = hasProvider ? requestedModel.slice(0, separatorIndex) : requestedModel;
+  const model = runtime.getModel(provider, hasProvider ? requestedModel.slice(separatorIndex + 1) : "");
   if (!model) throw new Error(`Unknown model: ${requestedModel}. ${unknownModelHint(runtime, provider)}`);
 
   return model;

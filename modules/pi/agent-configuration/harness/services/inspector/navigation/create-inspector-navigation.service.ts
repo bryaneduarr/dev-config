@@ -29,7 +29,7 @@ export function createInspectorNavigation(options: InspectorNavigationOptions): 
     subagentEntries: () => activityStore.all().filter((entry) => entry.toolName === TASK_TOOL_NAME),
     selectedIndex: (rows) => {
       const index = rows.findIndex((row) => isRowSelected(row, navigation.selection));
-      return index >= 0 ? index : 0;
+      return Math.max(index, 0);
     },
     currentRow: () => {
       const rows = navigation.buildRows();
