@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly repository_dir="$(cd "$module_dir/../.." && pwd)"
+module_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly module_dir
+repository_dir="$(cd "$module_dir/../.." && pwd)"
+readonly repository_dir
 readonly config_link="$HOME/.config/nvim"
 readonly spell_dir="$HOME/.local/share/nvim/site/spell"
 readonly spell_url="https://ftp.nluug.nl/vim/runtime/spell"
@@ -27,21 +29,13 @@ install_apt_dependencies() {
   if ! has_command fd && has_command fdfind; then
     link_into_local_bin "$(command -v fdfind)" fd
   fi
-  # Mason ships clangd and clang-format only for x86_64.
-  if [ "$(uname -m)" != x86_64 ]; then
-    apt_install_missing clangd:clangd clang-format:clang-format
-  fi
 }
 
 install_neovim() {
-  local architecture work_dir
-  architecture="$(node_architecture)"
-  case "$architecture" in
-    x64) architecture=x86_64 ;;
-  esac
+  local work_dir
   work_dir="$(mktemp -d)"
   log "Installing Neovim into $neovim_dir"
-  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$architecture.tar.gz" \
+  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$release_architecture.tar.gz" \
     -o "$work_dir/nvim.tar.gz"
   rm -rf "$neovim_dir"
   mkdir -p "$neovim_dir"
@@ -51,13 +45,12 @@ install_neovim() {
 }
 
 install_lua_language_server() {
-  local architecture version work_dir
-  architecture="$(node_architecture)"
-  version="$(curl -fsSL "https://api.github.com/repos/$lua_language_server_repository/releases/latest" \
-    | grep -oE '"tag_name": *"[^"]+"' | grep -oE '[0-9][^"]*')"
+  local version work_dir
+  version="$(curl -fsSL "https://api.github.com/repos/$lua_language_server_repository/releases/latest" |
+    grep -oE '"tag_name": *"[^"]+"' | grep -oE '[0-9][^"]*')"
   work_dir="$(mktemp -d)"
   log "Installing lua-language-server $version"
-  curl -fsSL "https://github.com/$lua_language_server_repository/releases/download/$version/lua-language-server-$version-linux-$architecture.tar.gz" \
+  curl -fsSL "https://github.com/$lua_language_server_repository/releases/download/$version/lua-language-server-$version-linux-$node_architecture.tar.gz" \
     -o "$work_dir/lua-language-server.tar.gz"
   rm -rf "$lua_language_server_dir"
   mkdir -p "$lua_language_server_dir"

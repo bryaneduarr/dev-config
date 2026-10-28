@@ -1,17 +1,21 @@
-# Sourced by install.sh and every module installer.
-
 : "${repository_dir:?set by the caller}"
 readonly data_dir="${DEV_CONFIG_DATA_DIR:-$HOME/.local/share/dev-config}"
 readonly node_dir="$data_dir/node"
 readonly tools_dir="$data_dir/tools"
 readonly local_bin_dir="$HOME/.local/bin"
 readonly required_node_major=24
+# Herdr's vendored libghostty-vt only builds with this exact Zig version.
 readonly required_zig_version=0.16.0
+readonly node_architecture=x64
+readonly release_architecture=x86_64
 readonly zig_dir="$data_dir/zig"
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
-fail() { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
+fail() {
+  printf '\033[1;31merror:\033[0m %s\n' "$*" >&2
+  exit 1
+}
 
 run_privileged() {
   if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo "$@"; fi
@@ -21,7 +25,6 @@ has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Arguments are command:package pairs; installs the packages whose command is absent.
 apt_install_missing() {
   local -a missing=()
   local pair
@@ -32,22 +35,6 @@ apt_install_missing() {
   log "Installing with apt: ${missing[*]} (sudo may ask for your password)"
   run_privileged apt-get update
   run_privileged apt-get install -y "${missing[@]}"
-}
-
-node_architecture() {
-  case "$(uname -m)" in
-    x86_64) echo x64 ;;
-    aarch64 | arm64) echo arm64 ;;
-    *) fail "unsupported CPU architecture: $(uname -m)" ;;
-  esac
-}
-
-github_release_architecture() {
-  case "$(uname -m)" in
-    x86_64) echo x86_64 ;;
-    aarch64 | arm64) echo aarch64 ;;
-    *) fail "unsupported CPU architecture: $(uname -m)" ;;
-  esac
 }
 
 prepare_environment() {
@@ -65,18 +52,17 @@ ensure_node() {
     return
   fi
 
-  local architecture release_url archive_name work_dir
-  architecture="$(node_architecture)"
+  local release_url archive_name work_dir
   release_url="https://nodejs.org/dist/latest-v${required_node_major}.x"
   work_dir="$(mktemp -d)"
 
-  log "Downloading Node.js $required_node_major ($architecture)"
+  log "Downloading Node.js $required_node_major ($node_architecture)"
   curl -fsSL "$release_url/SHASUMS256.txt" -o "$work_dir/SHASUMS256.txt"
-  archive_name="$(grep -oE "node-v[0-9.]+-linux-$architecture\.tar\.xz" "$work_dir/SHASUMS256.txt" | head -n 1)"
-  [ -n "$archive_name" ] || fail "no Node.js $required_node_major archive for $architecture"
+  archive_name="$(grep -oE "node-v[0-9.]+-linux-$node_architecture\.tar\.xz" "$work_dir/SHASUMS256.txt" | head -n 1)"
+  [ -n "$archive_name" ] || fail "no Node.js $required_node_major archive for $node_architecture"
   curl -fsSL "$release_url/$archive_name" -o "$work_dir/$archive_name"
-  (cd "$work_dir" && grep " $archive_name\$" SHASUMS256.txt | sha256sum --check --status) \
-    || fail "checksum mismatch for $archive_name"
+  (cd "$work_dir" && grep " $archive_name\$" SHASUMS256.txt | sha256sum --check --status) ||
+    fail "checksum mismatch for $archive_name"
 
   rm -rf "$node_dir"
   mkdir -p "$node_dir"
@@ -92,7 +78,6 @@ link_node_commands() {
   done
 }
 
-# Herdr's vendored libghostty-vt only builds with this exact Zig version.
 ensure_zig() {
   if [ -x "$zig_dir/zig" ] && [ "$("$zig_dir/zig" version)" = "$required_zig_version" ]; then
     log "Zig $required_zig_version already installed in $zig_dir"
@@ -100,20 +85,20 @@ ensure_zig() {
     return
   fi
 
-  local architecture index_url work_dir tarball_url expected_sha
-  architecture="$(github_release_architecture)-linux"
+  local zig_target index_url work_dir tarball_url expected_sha
+  zig_target="$release_architecture-linux"
   index_url="https://ziglang.org/download/index.json"
   work_dir="$(mktemp -d)"
 
   apt_install_missing jq:jq xz:xz-utils
-  log "Downloading Zig $required_zig_version ($architecture)"
+  log "Downloading Zig $required_zig_version ($zig_target)"
   curl -fsSL "$index_url" -o "$work_dir/index.json"
-  tarball_url="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].tarball // empty' "$work_dir/index.json")"
-  expected_sha="$(jq -r --arg v "$required_zig_version" --arg a "$architecture" '.[$v][$a].shasum // empty' "$work_dir/index.json")"
-  [ -n "$tarball_url" ] && [ -n "$expected_sha" ] || fail "no Zig $required_zig_version download for $architecture"
+  tarball_url="$(jq -r --arg v "$required_zig_version" --arg a "$zig_target" '.[$v][$a].tarball // empty' "$work_dir/index.json")"
+  expected_sha="$(jq -r --arg v "$required_zig_version" --arg a "$zig_target" '.[$v][$a].shasum // empty' "$work_dir/index.json")"
+  [ -n "$tarball_url" ] && [ -n "$expected_sha" ] || fail "no Zig $required_zig_version download for $zig_target"
   curl -fsSL "$tarball_url" -o "$work_dir/zig.tar.xz"
-  printf '%s  %s\n' "$expected_sha" "$work_dir/zig.tar.xz" | sha256sum --check --status \
-    || fail "checksum mismatch for the Zig download"
+  printf '%s  %s\n' "$expected_sha" "$work_dir/zig.tar.xz" | sha256sum --check --status ||
+    fail "checksum mismatch for the Zig download"
 
   rm -rf "$zig_dir"
   mkdir -p "$zig_dir"

@@ -9,12 +9,9 @@ local tools = {
   "prettierd",
   "eslint_d",
   "cpplint",
+  "clangd",
+  "clang-format",
 }
-
--- Mason ships clangd and clang-format only for x86_64; aarch64 uses the clang-tools Nix package.
-if vim.uv.os_uname().machine == "x86_64" then
-  vim.list_extend(tools, { "clangd", "clang-format" })
-end
 
 return {
   "williamboman/mason.nvim",
