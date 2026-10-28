@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+    "editorconfig.editorconfig",
+    "mads-hartmann.bash-ide-vscode",
+    "biomejs.biome",
+    "sumneko.lua",
+    "johnnymorganz.stylua",
+    "github.vscode-pull-request-github",
+    "usernamehw.errorlens"
+  ],
+}

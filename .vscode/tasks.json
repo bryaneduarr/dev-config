@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "check-code: changed files",
+      "type": "shell",
+      "command": "check-code",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "check-code: whole project",
+      "type": "shell",
+      "command": "check-code .",
+      "problemMatcher": [],
+      "group": "test"
+    }
+  ]
+}
