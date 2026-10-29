@@ -18,8 +18,8 @@ build_patched_herdr() (
   local build_dir
   build_dir="$(mktemp -d)"
   trap 'rm -rf "$build_dir"' EXIT
+  run_module rust
   export PATH="$cargo_bin_dir:$PATH"
-  has_command cargo || run_module rust
   ensure_zig
   log "Building Herdr $herdr_version with the tab bar toggle patch"
   git clone -q --depth 1 --branch "$herdr_version" "$source_url" "$build_dir/herdr"
