@@ -3,7 +3,7 @@ set -euo pipefail
 
 repository_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly repository_dir
-readonly -a all_modules=(herdr tmux yazi neovim pi agents bash rule-audit check-code)
+readonly -a all_modules=(rust android herdr tmux yazi neovim pi agents bash rule-audit check-code)
 
 # shellcheck source=lib/common.sh
 source "$repository_dir/lib/common.sh"
