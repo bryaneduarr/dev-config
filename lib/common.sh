@@ -31,10 +31,27 @@ apt_install_missing() {
   for pair in "$@"; do
     has_command "${pair%%:*}" || missing+=("${pair#*:}")
   done
-  [ "${#missing[@]}" -gt 0 ] || return 0
-  log "Installing with apt: ${missing[*]} (sudo may ask for your password)"
+  install_apt_packages "${missing[@]}"
+}
+
+apt_install_missing_packages() {
+  local -a missing=()
+  local package
+  for package in "$@"; do
+    is_apt_package_installed "$package" || missing+=("$package")
+  done
+  install_apt_packages "${missing[@]}"
+}
+
+is_apt_package_installed() {
+  dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q 'install ok installed'
+}
+
+install_apt_packages() {
+  [ "$#" -gt 0 ] || return 0
+  log "Installing with apt: $* (sudo may ask for your password)"
   run_privileged apt-get update
-  run_privileged apt-get install -y "${missing[@]}"
+  run_privileged apt-get install -y "$@"
 }
 
 prepare_environment() {
