@@ -10,6 +10,8 @@ export interface RunRequest {
   readonly command: string;
   /** Milliseconds before the command is killed. */
   readonly timeoutMs: number;
+  /** Hint added to the result when the command or a program in it is not installed. */
+  readonly missingCommandHint: string;
   /** Whether the caller can abort the command. */
   readonly cancellation: ToolCancellation;
 }

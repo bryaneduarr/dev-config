@@ -10,6 +10,7 @@ function runInTemporaryDirectory(command: string): Promise<string> {
     directory: tmpdir(),
     command,
     timeoutMs: DEFAULT_RUN_TIMEOUT_MS,
+    missingCommandHint: "command not found",
     cancellation: { kind: "uncancellable" },
   });
 }

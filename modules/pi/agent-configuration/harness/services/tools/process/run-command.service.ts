@@ -7,6 +7,7 @@ import {
   KILL_SIGNAL,
   MAX_CAPTURE_BYTES,
   NO_TIMEOUT_MS,
+  SHELL_PROGRAM,
 } from "../../../constants/tools/process/process.constant.ts";
 import type { ExecRequest } from "../../../types/tools/process/exec-request.interface.ts";
 import type { ExecResult } from "../../../types/tools/process/exec-result.interface.ts";
@@ -25,7 +26,7 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
           })
         : spawn(command.shellLine, {
             cwd,
-            shell: true,
+            shell: SHELL_PROGRAM,
             env: process.env,
             stdio: CHILD_STDIO,
           });

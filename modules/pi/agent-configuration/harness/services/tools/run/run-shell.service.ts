@@ -23,7 +23,7 @@ export async function runShell(request: RunRequest): Promise<string> {
   });
 
   const combined = combineCommandOutput(result);
-  const header = formatRunHeader(result);
+  const header = formatRunHeader(result, request.missingCommandHint);
 
   if (!combined) {
     return header;

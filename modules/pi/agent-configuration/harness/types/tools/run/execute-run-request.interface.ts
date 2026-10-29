@@ -7,6 +7,8 @@ export interface ExecuteRunRequest {
   readonly cwd: string;
   /** Input of the run tool after argument repair. */
   readonly parameters: RunParameters;
+  /** Hint added to the result when the command or a program in it is not installed. */
+  readonly missingCommandHint: string;
   /** Whether the caller can abort the command. */
   readonly cancellation: ToolCancellation;
 }
