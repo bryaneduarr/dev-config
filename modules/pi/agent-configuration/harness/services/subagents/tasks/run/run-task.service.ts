@@ -1,4 +1,3 @@
-import { APPROVED_COMMAND_TOOL } from "../../../../constants/subagents/roles/roles.constant.ts";
 import {
   ABORTED_STOP_REASON,
   ERROR_STOP_REASON,
@@ -9,7 +8,6 @@ import {
   STOPPED_TASK_LABEL,
   TIMED_OUT_ERROR_MESSAGE,
 } from "../../../../constants/subagents/tasks/progress/progress.constant.ts";
-import { createApprovedCommandTool } from "../../../../tools/approved-command/approved-command.tool.ts";
 import type { TaskResult } from "../../../../types/subagents/result/task-result.interface.ts";
 import type { TaskProgress } from "../../../../types/subagents/tasks/progress/task-progress.interface.ts";
 import type { TaskStatus } from "../../../../types/subagents/tasks/progress/task-status.interface.ts";
@@ -29,6 +27,7 @@ import { createTaskProgress } from "../progress/create-task-progress.service.ts"
 import { readContextTokens } from "../progress/read-context-tokens.service.ts";
 import { trackTaskProgress } from "../progress/track-task-progress.service.ts";
 import { composeTaskSystemPrompt } from "./compose-task-system-prompt.service.ts";
+import { createChildToolSet } from "./create-child-tool-set.service.ts";
 import { createTaskResourceLoader } from "./create-task-resource-loader.service.ts";
 import { createTaskSession } from "./create-task-session.service.ts";
 import { promptTaskSession } from "./prompt-task-session.service.ts";
@@ -63,9 +62,7 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
     }),
     skillNames: request.skills.state === "present" ? request.skills.value : [],
   });
-  const customTools = resolvedRole.tools.includes(APPROVED_COMMAND_TOOL)
-    ? [createApprovedCommandTool(resolvedRole.verificationCommands)]
-    : [];
+  const toolSet = createChildToolSet(resolvedRole.tools, resolvedRole.verificationCommands);
   const session = await createTaskSession({
     cwd: ctx.cwd,
     model,
@@ -74,8 +71,8 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
       request.reasoning.state === "present"
         ? request.reasoning.value
         : (ctx.thinkingLevel ?? DEFAULT_TASK_REASONING_LEVEL),
-    tools: resolvedRole.tools,
-    customTools,
+    tools: toolSet.toolNames,
+    customTools: toolSet.customTools,
     resourceLoader,
   });
 
