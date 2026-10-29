@@ -12,10 +12,10 @@ describe("formatSearchResult", () => {
       definitions: [{ file: "src/sample.ts", line: 2, text: "function sample()" }],
       limit: 10,
     });
-    expect(output).toContain("Definition:\nsrc/sample.ts:2");
+    expect(output).toContain("Definition:\nsrc/sample.ts:2: function sample()");
     expect(output).toContain("Files:\nsrc/sample.ts");
     expect(output).toContain("Tests:\ntests/sample.test.ts");
-    expect(output).toContain("References:\nsrc/sample.ts:8");
+    expect(output).toContain("References:\nsrc/sample.ts:8: sample");
   });
 
   test("reports omitted matches", () => {

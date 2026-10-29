@@ -1,9 +1,10 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import type { LoadedFile } from "../../../types/tools/read/loaded-file.interface.ts";
 import type { ReadRequest } from "../../../types/tools/read/read-request.interface.ts";
 import { resolveToolPath } from "../path/resolve-tool-path.service.ts";
 import { stripAtPrefix } from "../path/strip-at-prefix.service.ts";
 import { splitLines } from "../text/split-lines.service.ts";
+import { listDirectory } from "./list-directory.service.ts";
 import { readAutomaticSelection } from "./read-automatic-selection.service.ts";
 import { readLineRange } from "./read-line-range.service.ts";
 import { readSymbolSection } from "./read-symbol-section.service.ts";
@@ -18,9 +19,18 @@ function toLoadedFile(displayPath: string, absolutePath: string, content: string
   };
 }
 
+async function isDirectory(absolutePath: string): Promise<boolean> {
+  try {
+    return (await stat(absolutePath)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 export async function readSource(request: ReadRequest): Promise<string> {
   const displayPath = stripAtPrefix(request.path);
   const absolutePath = resolveToolPath(request.cwd, request.path);
+  if (await isDirectory(absolutePath)) return listDirectory(displayPath, absolutePath);
 
   let content: string;
   try {

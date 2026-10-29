@@ -6,6 +6,7 @@ import type { SearchMatch } from "../../../types/tools/search/search-match.inter
 import type { SearchScope } from "../../../types/tools/search/search-scope.interface.ts";
 import { parseJsonLine } from "../process/parse-json-line.service.ts";
 import { runArgv } from "../process/run-argv.service.ts";
+import { toRelativePath } from "./to-relative-path.service.ts";
 
 function rgArgv(query: string, scope: SearchScope, isLiteral: boolean): readonly [string, ...string[]] {
   return [
@@ -20,7 +21,7 @@ function rgArgv(query: string, scope: SearchScope, isLiteral: boolean): readonly
   ];
 }
 
-function parseRgMatches(stdout: string): SearchMatch[] {
+function parseRgMatches(stdout: string, cwd: string): SearchMatch[] {
   const matches: SearchMatch[] = [];
   for (const rawLine of stdout.split("\n")) {
     if (!rawLine.trim()) continue;
@@ -29,7 +30,7 @@ function parseRgMatches(stdout: string): SearchMatch[] {
     const event = parsedLine.event;
     const lineText = "text" in event.data.lines ? event.data.lines.text : EMPTY_LINE_TEXT;
     matches.push({
-      file: event.data.path.text,
+      file: toRelativePath(cwd, event.data.path.text),
       line: event.data.line_number,
       text: lineText.replace(/\r?\n$/, ""),
     });
@@ -40,10 +41,10 @@ function parseRgMatches(stdout: string): SearchMatch[] {
 export async function rgMatches(request: SearchCommandRequest): Promise<SearchMatch[]> {
   const { cwd, query, scope, cancellation } = request;
   const result = await runArgv(cwd, rgArgv(query, scope, false), cancellation);
-  const matches = parseRgMatches(result.stdout);
+  const matches = parseRgMatches(result.stdout, cwd);
   const isRejectedPattern = result.code === RG_ERROR_EXIT_CODE && matches.length === 0;
   if (!isRejectedPattern) return matches;
 
   const literalResult = await runArgv(cwd, rgArgv(query, scope, true), cancellation);
-  return parseRgMatches(literalResult.stdout);
+  return parseRgMatches(literalResult.stdout, cwd);
 }

@@ -1,4 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { defineTool } from "@earendil-works/pi-coding-agent";
 import { SEARCH_TOOL_NAME } from "../../constants/tools/active-tools/harness-tools.constant.ts";
 import {
   SEARCH_TOOL_DESCRIPTION,
@@ -11,11 +12,11 @@ import { createHarnessRenderers } from "../../services/tool-rendering/renderers/
 import { hideBackendDeclarations } from "../../services/tools/backends/hide-backend-declarations.service.ts";
 import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
 import { toTextToolResult } from "../../services/tools/result/to-text-tool-result.service.ts";
-import { searchRepo } from "../../services/tools/search/search-repo.service.ts";
-import { toSearchRequest } from "../../services/tools/search/to-search-request.service.ts";
+import { searchMany } from "../../services/tools/search/search-many.service.ts";
+import { toSearchRequests } from "../../services/tools/search/to-search-requests.service.ts";
 
-export function registerSearchTool(pi: ExtensionAPI): void {
-  pi.registerTool({
+export function createSearchToolDefinition() {
+  return defineTool({
     name: SEARCH_TOOL_NAME,
     label: SEARCH_TOOL_LABEL,
     description: SEARCH_TOOL_DESCRIPTION,
@@ -25,12 +26,16 @@ export function registerSearchTool(pi: ExtensionAPI): void {
     prepareLoadout: hideBackendDeclarations,
     ...createHarnessRenderers(SEARCH_TOOL_NAME),
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
-      const request = toSearchRequest(params, {
+      const requests = toSearchRequests(params, {
         cwd: ctx.cwd,
         backend: ctx,
         cancellation: toToolCancellation(signal),
       });
-      return toTextToolResult(await searchRepo(request));
+      return toTextToolResult(await searchMany(requests));
     },
   });
+}
+
+export function registerSearchTool(pi: ExtensionAPI): void {
+  pi.registerTool(createSearchToolDefinition());
 }

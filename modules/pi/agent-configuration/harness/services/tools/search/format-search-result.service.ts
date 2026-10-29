@@ -1,9 +1,13 @@
 import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
 import type { SearchResultSections } from "../../../types/tools/search/search-result-sections.interface.ts";
 import { locationKey } from "./location-key.service.ts";
+import { toSnippet } from "./to-snippet.service.ts";
 
 function formatLocations(matches: readonly SearchMatch[], limit: number): string {
-  return matches.slice(0, limit).map(locationKey).join("\n");
+  return matches
+    .slice(0, limit)
+    .map((match) => `${locationKey(match)}: ${toSnippet(match.text)}`)
+    .join("\n");
 }
 
 export function formatSearchResult(sections: SearchResultSections): string {

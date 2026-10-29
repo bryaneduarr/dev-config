@@ -4,11 +4,15 @@ import type { SearchEnvironment } from "../../../types/tools/search/search-envir
 import type { SearchParameters } from "../../../types/tools/search/search-parameters.interface.ts";
 import type { SearchRequest } from "../../../types/tools/search/search-request.interface.ts";
 
-export function toSearchRequest(parameters: SearchParameters, environment: SearchEnvironment): SearchRequest {
+export function toSearchRequest(
+  query: string,
+  parameters: SearchParameters,
+  environment: SearchEnvironment,
+): SearchRequest {
   const { cwd, backend, cancellation } = environment;
   return {
     cwd,
-    query: parameters.query,
+    query,
     kind: parameters.kind ?? DEFAULT_SEARCH_KIND,
     scope: parameters.path ? { kind: "path", path: parameters.path } : { kind: "workspace" },
     limit: parameters.limit ?? DEFAULT_SEARCH_LIMIT,

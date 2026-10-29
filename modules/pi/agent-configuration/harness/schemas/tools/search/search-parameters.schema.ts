@@ -1,13 +1,23 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 import { DEFAULT_SEARCH_KIND, SEARCH_KINDS } from "../../../constants/tools/search/search-kinds.constant.ts";
-import { DEFAULT_SEARCH_LIMIT } from "../../../constants/tools/search/search-limits.constant.ts";
+import { DEFAULT_SEARCH_LIMIT, MAX_SEARCH_QUERIES } from "../../../constants/tools/search/search-limits.constant.ts";
 
 export const SearchParamsSchema = Type.Object({
   /** Text, filename, symbol, pattern, or commit text to find. */
-  query: Type.String({
-    description: "Text, filename, symbol, structural pattern, or commit text to find.",
-  }),
+  query: Type.Optional(
+    Type.String({
+      description: "Text, filename, symbol, structural pattern, or commit text to find. Use queries for several.",
+    }),
+  ),
+  /** Several searches that run together and share kind, path, and limit. */
+  queries: Type.Optional(
+    Type.Array(Type.String(), {
+      minItems: 1,
+      maxItems: MAX_SEARCH_QUERIES,
+      description: `Up to ${MAX_SEARCH_QUERIES} searches run in parallel in one call; each result is labelled by its query.`,
+    }),
+  ),
   /** Search strategy. */
   kind: Type.Optional(
     StringEnum(SEARCH_KINDS, {

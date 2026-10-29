@@ -1,1 +1,4 @@
 export const DEFAULT_SEARCH_LIMIT = 20;
+export const MAX_SEARCH_QUERIES = 20;
+export const MAX_SEARCH_BATCH_CHARS = 30_000;
+export const MIN_SEARCH_SHARE_CHARS = 1_500;

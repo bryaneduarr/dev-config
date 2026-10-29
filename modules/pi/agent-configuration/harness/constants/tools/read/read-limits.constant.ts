@@ -7,3 +7,6 @@ export const STRUCTURE_HEAD_LINES = 30;
 export const SYMBOL_SCAN_LINE_LIMIT = 40;
 export const SYMBOL_FALLBACK_LINE_SPAN = 120;
 export const OUTLINE_MAX_LINES = 80;
+export const MAX_DIRECTORY_ENTRIES = 200;
+export const MAX_READ_FILES = 24;
+export const MAX_READ_BATCH_CHARS = 36_000;

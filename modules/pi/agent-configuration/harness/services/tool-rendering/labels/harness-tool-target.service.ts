@@ -8,6 +8,8 @@ import {
 import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { splitLeadingCd } from "../../tools/run/split-leading-cd.service.ts";
 import { oneLine } from "../text/one-line.service.ts";
+import { readTarget } from "./read-target.service.ts";
+import { searchTarget } from "./search-target.service.ts";
 
 function stringArg(args: Record<string, unknown>, key: string): string {
   const argument = args[key];
@@ -25,13 +27,10 @@ function runTarget(command: string, cwd: string): string {
 
 export function harnessToolTarget(tool: HarnessTool, args: Record<string, unknown>): string {
   switch (tool) {
-    case SEARCH_TOOL_NAME: {
-      const query = oneLine(stringArg(args, "query"));
-      const kind = stringArg(args, "kind");
-      return kind && kind !== "auto" ? `${query} (${kind})` : query;
-    }
+    case SEARCH_TOOL_NAME:
+      return searchTarget(args);
     case READ_TOOL_NAME:
-      return oneLine(stringArg(args, "path"));
+      return readTarget(args);
     case EDIT_TOOL_NAME: {
       const from = stringArg(args, "from") || stringArg(args, "path");
       const to = stringArg(args, "to");
