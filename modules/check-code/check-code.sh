@@ -6,7 +6,7 @@ readonly script_dir
 
 for sourced_file in \
   record-check-results collect-target-files check-nix-files check-shell-files \
-  check-typescript-projects check-lua-files check-c-files check-web-files; do
+  check-typescript-projects check-lua-files check-c-files check-rust-files check-web-files; do
   # shellcheck source=/dev/null
   source "$script_dir/$sourced_file.sh"
 done
@@ -31,5 +31,6 @@ check_shell_files
 check_typescript_projects
 check_lua_files
 check_c_files
+check_rust_files
 check_web_files
 print_check_summary

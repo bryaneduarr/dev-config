@@ -16,6 +16,7 @@ main() {
   apt_install_missing shellcheck:shellcheck shfmt:shfmt
   install_global_npm_tools "${global_npm_tools[@]}"
   run_module rule-audit
+  has_command cargo || warn "Rust checks need cargo: run ./install.sh rust"
   has_command lua-language-server || warn "Lua checks need lua-language-server and nvim: run ./install.sh neovim"
   link_into_local_bin "$module_dir/check-code.sh" check-code
   log "check-code installed. Run: check-code [path ...]"

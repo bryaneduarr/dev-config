@@ -84,6 +84,7 @@ Agents cannot see editor diagnostics, so they run the command-line equivalent of
 - Shell (`bashls`): `shellcheck` and `shfmt -d`.
 - Lua (`lua_ls`): `lua-language-server --check` with `modules/neovim/config/.luarc.json`, and `stylua --check`.
 - C and C++ (`clangd`): `clang-tidy` when the project has a compile database.
+- Rust (`rust_analyzer`): `cargo fmt --all --check` and `cargo clippy --workspace --all-targets -- -D warnings` from the workspace that owns `Cargo.lock`.
 - CSS (`cssls`): `biome ci`.
 - HTML, Tailwind, and Emmet have no command-line diagnostics; report them as unchecked.
 
