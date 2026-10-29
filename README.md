@@ -9,7 +9,9 @@ Personal development environment for Ubuntu 26.04 on WSL2. Each module installs 
 
 | Module | Installs |
 | --- | --- |
-| `herdr` | Herdr binary and `~/.config/herdr/config.toml` |
+| `rust` | Rust stable with clippy, rustfmt, rust-analyzer, wasm, aarch64 and Android targets, and `dx`, `just`, `bacon`, `cargo-nextest`, `cargo-zigbuild` |
+| `android` | JDK 17, Android SDK, NDK, emulator, the `pixel-7-android-36` virtual device, and `~/.config/android/environment.sh` sourced from `~/.bashrc` |
+| `herdr` | Herdr binary and `~/.config/herdr/config.toml` (also installs `rust`) |
 | `tmux` | tmux, TPM (pinned), plugins, `~/.config/tmux/tmux.conf` |
 | `yazi` | Yazi, preview tools, plugins, config |
 | `neovim` | Neovim, Mason tools, Treesitter parsers, language servers, config linked from `modules/neovim/config` (also installs `yazi`) |
