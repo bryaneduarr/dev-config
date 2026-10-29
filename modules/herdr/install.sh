@@ -18,12 +18,8 @@ build_patched_herdr() (
   local build_dir
   build_dir="$(mktemp -d)"
   trap 'rm -rf "$build_dir"' EXIT
-  apt_install_missing cc:build-essential pkg-config:pkg-config
-  if ! has_command cargo && [ ! -x "$cargo_bin_dir/cargo" ]; then
-    log "Installing the Rust toolchain with rustup"
-    curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
-  fi
   export PATH="$cargo_bin_dir:$PATH"
+  has_command cargo || run_module rust
   ensure_zig
   log "Building Herdr $herdr_version with the tab bar toggle patch"
   git clone -q --depth 1 --branch "$herdr_version" "$source_url" "$build_dir/herdr"
