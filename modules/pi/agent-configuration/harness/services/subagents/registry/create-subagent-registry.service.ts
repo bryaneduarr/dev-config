@@ -1,15 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles/roles.constant.ts";
 import { STOPPED_TASK_LABEL } from "../../../constants/subagents/tasks/progress/progress.constant.ts";
+import {
+  MAX_RUNNING_IMPLEMENT_SUBAGENTS,
+  MAX_RUNNING_SUBAGENTS,
+} from "../../../constants/subagents/tasks/run/task-limit.constant.ts";
 import type { SubagentRegistry } from "../../../types/subagents/registry/subagent-registry.interface.ts";
 import type { SubagentRun } from "../../../types/subagents/registry/subagent-run.interface.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
 import { createTaskProgress } from "../tasks/progress/create-task-progress.service.ts";
 import { runTask } from "../tasks/run/run-task.service.ts";
-import { createImplementationQueue } from "./create-implementation-queue.service.ts";
+import { createSlotLimiter } from "./create-slot-limiter.service.ts";
 
 export function createSubagentRegistry(): SubagentRegistry {
-  const implementationQueue = createImplementationQueue();
+  const runningSlots = createSlotLimiter(MAX_RUNNING_SUBAGENTS);
+  const implementSlots = createSlotLimiter(MAX_RUNNING_IMPLEMENT_SUBAGENTS);
   const runsById = new Map<string, SubagentRun>();
 
   const cancel = (id: string): boolean => {
@@ -27,7 +32,7 @@ export function createSubagentRegistry(): SubagentRegistry {
       const controller = new AbortController();
       const resolvedRole = resolveTaskRole(request);
       const progress = createTaskProgress(id, request.title, resolvedRole);
-      const execute = () =>
+      const runInSlot = () =>
         runTask({
           id,
           request,
@@ -41,8 +46,8 @@ export function createSubagentRegistry(): SubagentRegistry {
             onProgress(nextProgress);
           },
         });
-      const result =
-        resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementationQueue.run(execute) : Promise.resolve().then(execute);
+      const execute = () => runningSlots.run(runInSlot);
+      const result = resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementSlots.run(execute) : execute();
 
       runsById.set(id, { controller, progress, result });
       onProgress(progress);
