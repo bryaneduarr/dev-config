@@ -5,6 +5,8 @@ import { replaceOnce } from "../../source-edit/replace-once.service.ts";
 
 // Must match MESSAGE_CARD_RENDERER_KEY in the harness transcript constants.
 const RENDERER_KEY = "pi.harness.renderMessageCard";
+// Must match INTERMEDIATE_REPLY_CHECK_KEY in the harness transcript constants.
+const INTERMEDIATE_REPLY_CHECK_KEY = "pi.harness.isIntermediateReply";
 
 const MODULAR_HELPER = `function harnessCardLines(kind, width, renderContent) {
     const renderCard = Reflect.get(globalThis, "${RENDERER_KEY}");
@@ -15,7 +17,12 @@ const MODULAR_REPLY_HELPER = `function harnessFinalReply(message, reply) {
     if (message.content.some((content) => content.type === "toolCall"))
         return reply;
     return {
-        render: (width) => harnessCardLines("agent", width, (contentWidth) => reply.render(contentWidth)),
+        render: (width) => {
+            const isIntermediateReply = Reflect.get(globalThis, "${INTERMEDIATE_REPLY_CHECK_KEY}");
+            if (typeof isIntermediateReply === "function" && isIntermediateReply(message))
+                return reply.render(width);
+            return harnessCardLines("agent", width, (contentWidth) => reply.render(contentWidth));
+        },
         invalidate: () => reply.invalidate(),
     };
 }
@@ -25,8 +32,11 @@ const BUNDLED_HELPER = [
   `let renderCard=Reflect.get(globalThis,"${RENDERER_KEY}");`,
   'return typeof renderCard=="function"?renderCard(kind,width,renderContent):renderContent(width)}',
   "function harnessFinalReply(message,reply){",
-  'return message.content.some(content=>content.type==="toolCall")?reply:',
-  '{render:width=>harnessCardLines("agent",width,contentWidth=>reply.render(contentWidth)),invalidate:()=>reply.invalidate()}}',
+  'if(message.content.some(content=>content.type==="toolCall"))return reply;',
+  "return{render:width=>{",
+  `let isIntermediateReply=Reflect.get(globalThis,"${INTERMEDIATE_REPLY_CHECK_KEY}");`,
+  "return typeof isIntermediateReply=='function'&&isIntermediateReply(message)?reply.render(width):",
+  'harnessCardLines("agent",width,contentWidth=>reply.render(contentWidth))},invalidate:()=>reply.invalidate()}}',
 ].join("");
 
 const MODULAR_RENDER = "const lines = super.render(width);";
