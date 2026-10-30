@@ -36,7 +36,7 @@ beforeEach(() => {
 
 test("a running tool call sits between the header and footer of the group", () => {
   beginMessage();
-  activityStore.begin({ id: "run-1", toolName: "run", args: { command: "cd /tmp" }, cwd: TEST_CWD, startedAt: 0 });
+  activityStore.begin({ id: "run-1", toolName: "bash", args: { command: "cd /tmp" }, cwd: TEST_CWD, startedAt: 0 });
 
   const [header, toolLine, footer, ...rest] = renderActivitySummary({ messageNumber: 1 }, taggedTheme, atLatest).render(
     WIDTH,
@@ -71,7 +71,7 @@ test("scrolling away from the latest message adds the jump hint to the footer", 
 
 test("a finished turn shows only the completed label in the success color", () => {
   beginMessage();
-  activityStore.begin({ id: "run-1", toolName: "run", args: { command: "cd /tmp" }, cwd: TEST_CWD, startedAt: 0 });
+  activityStore.begin({ id: "run-1", toolName: "bash", args: { command: "cd /tmp" }, cwd: TEST_CWD, startedAt: 0 });
   activitySummaryState.setProgress(false, 0);
 
   const [header] = renderActivitySummary({ messageNumber: 1 }, taggedTheme, atLatest).render(WIDTH);

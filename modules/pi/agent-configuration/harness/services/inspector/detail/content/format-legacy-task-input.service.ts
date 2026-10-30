@@ -1,7 +1,7 @@
 import { EMPTY_TEXT_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import { readStringList } from "./read-string-list.service.ts";
 
-const TASK_DEFAULT_TOOLS = "search, read, run";
+const TASK_DEFAULT_TOOLS = "search, read, bash";
 
 export function formatLegacyTaskInput(args: Record<string, unknown>): string {
   const prompt = typeof args.prompt === "string" ? args.prompt : EMPTY_TEXT_LABEL;

@@ -19,7 +19,7 @@ function assistantTurn(command: string): string {
       provider: "example",
       model: "small",
       usage: { input: 100, cacheRead: 900, cacheWrite: 0, cost: { total: 0.5 } },
-      content: [{ type: "thinking" }, { type: "toolCall", name: "run", arguments: { command } }],
+      content: [{ type: "thinking" }, { type: "toolCall", name: "bash", arguments: { command } }],
     },
   });
 }
@@ -40,7 +40,7 @@ test("aggregates turns, prompt tokens, errors, compactions, and cd-prefixed runs
 
   expect(stats.sessions).toBe(1);
   expect(stats.compactions).toBe(1);
-  expect(stats.tools.get("run")).toBe(2);
+  expect(stats.tools.get("bash")).toBe(2);
   expect(stats.models.get("example/small")).toEqual({
     turns: 2,
     toolCalls: 2,

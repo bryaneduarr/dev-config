@@ -11,7 +11,7 @@ const REPLACED_BY_HARNESS = ["read", "bash", ...REPLACED_BY_SEARCH, APPROVED_COM
 export function createChildToolSet(requested: readonly string[], approvedCommands: readonly string[]): ChildToolSet {
   const customTools = [
     ...(requested.includes("read") ? [createReadToolDefinition()] : []),
-    ...(requested.includes("bash") ? [createRunToolDefinition("bash")] : []),
+    ...(requested.includes("bash") ? [createRunToolDefinition()] : []),
     ...(requested.some((tool) => REPLACED_BY_SEARCH.includes(tool)) ? [createSearchToolDefinition()] : []),
     ...(requested.includes(APPROVED_COMMAND_TOOL) ? [createApprovedCommandTool(approvedCommands)] : []),
   ];

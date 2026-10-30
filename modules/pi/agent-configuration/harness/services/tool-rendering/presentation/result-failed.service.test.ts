@@ -16,11 +16,11 @@ function runInTemporaryDirectory(command: string): Promise<string> {
 }
 
 test("a run that exits with code 0 is not a failure, with or without output", async () => {
-  expect(resultFailed("run", await runInTemporaryDirectory("true"))).toBe(false);
-  expect(resultFailed("run", await runInTemporaryDirectory("printf listed"))).toBe(false);
+  expect(resultFailed("bash", await runInTemporaryDirectory("true"))).toBe(false);
+  expect(resultFailed("bash", await runInTemporaryDirectory("printf listed"))).toBe(false);
 });
 
 test("a run that exits with a nonzero code is a failure", async () => {
-  expect(resultFailed("run", await runInTemporaryDirectory("exit 1"))).toBe(true);
-  expect(resultFailed("run", await runInTemporaryDirectory("exit 10"))).toBe(true);
+  expect(resultFailed("bash", await runInTemporaryDirectory("exit 1"))).toBe(true);
+  expect(resultFailed("bash", await runInTemporaryDirectory("exit 10"))).toBe(true);
 });

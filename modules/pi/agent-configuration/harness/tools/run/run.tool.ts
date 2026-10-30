@@ -14,10 +14,10 @@ import { executeRun } from "../../services/tools/run/execute-run.service.ts";
 import { prepareRunArguments } from "../../services/tools/run/prepare-run-arguments.service.ts";
 import { readHostGuidance } from "../../services/tools/run/read-host-guidance.service.ts";
 
-export function createRunToolDefinition(name: string) {
+export function createRunToolDefinition() {
   const host = readHostGuidance(process.env);
   return defineTool({
-    name,
+    name: RUN_TOOL_NAME,
     label: RUN_TOOL_LABEL,
     description: `${RUN_TOOL_DESCRIPTION} ${host.descriptionNote}`,
     promptSnippet: RUN_TOOL_PROMPT_SNIPPET,
@@ -37,5 +37,5 @@ export function createRunToolDefinition(name: string) {
 }
 
 export function registerRunTool(pi: ExtensionAPI): void {
-  pi.registerTool(createRunToolDefinition(RUN_TOOL_NAME));
+  pi.registerTool(createRunToolDefinition());
 }

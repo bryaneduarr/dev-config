@@ -23,7 +23,7 @@ test("child calls of a subagent hang under it as a tree with their start times",
     ...NO_TOOL_RESULT_FIELDS,
     text: "",
     status: { state: "absent" },
-    sub: [subCall("first", "read", 2_000), subCall("last", "run", 3_000)],
+    sub: [subCall("first", "read", 2_000), subCall("last", "bash", 3_000)],
   });
   const rows = buildInspectorRows({ page: "tools", expandedTasks: new Set(["s"]), openedSubagent: { kind: "none" } });
 

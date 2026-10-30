@@ -39,7 +39,7 @@ beforeEach(() => {
       },
       {
         id: "s-run",
-        toolName: "run",
+        toolName: "bash",
         args: {},
         status: "running",
         text: "",

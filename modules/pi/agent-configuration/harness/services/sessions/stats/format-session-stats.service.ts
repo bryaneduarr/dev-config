@@ -18,7 +18,7 @@ function formatModel(name: string, model: ModelStats): string {
     `${name}`,
     `  turns ${model.turns}, calls/turn ${ratio(model.toolCalls, model.turns)}, errors ${model.toolErrors}`,
     `  avg prompt ${averagePrompt}k, largest ${Math.round(model.largestPromptTokens / TOKENS_PER_THOUSAND)}k, cache hit ${percent(model.cacheReadTokens, model.promptTokens)}`,
-    `  cost $${model.cost.toFixed(2)}, run calls starting with cd ${model.cdPrefixedRuns}`,
+    `  cost $${model.cost.toFixed(2)}, bash calls starting with cd ${model.cdPrefixedRuns}`,
   ].join("\n");
 }
 

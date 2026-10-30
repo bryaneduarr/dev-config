@@ -17,7 +17,7 @@ test("a single replaced search tool still brings the search tool in only once", 
   expect(toolSet.toolNames).toEqual(["search"]);
 });
 
-test("bash becomes the harness run tool under the name bash", () => {
+test("bash becomes the harness bash tool", () => {
   const toolSet = createChildToolSet(["bash", "edit", "write"], []);
   expect(namesOf(toolSet.customTools)).toEqual(["bash"]);
   expect([...toolSet.toolNames].sort()).toEqual(["bash", "edit", "write"]);

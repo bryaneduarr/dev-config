@@ -12,8 +12,8 @@ export const RUN_TOOL_DESCRIPTION = [
 export const RUN_TOOL_PROMPT_SNIPPET = "Run shell commands not covered by search, read, or edit";
 
 export const RUN_TOOL_GUIDELINES = [
-  "Use run only when search, read, or edit does not cover the operation: read files with read, not cat, sed, head, or tail; find text and files with search, not grep, rg, find, or ls.",
-  "Do not start run commands with `cd`; set `cwd` instead.",
+  "Use bash only when search, read, or edit does not cover the operation: read files with read, not cat, sed, head, or tail; find text and files with search, not grep, rg, find, or ls.",
+  "Do not start bash commands with `cd`; set `cwd` instead.",
   "In shell commands, use `fd` instead of `find` and `rg` instead of `grep`; both are faster and skip ignored files.",
   "Use `ast-grep` for code shapes, `jq` for JSON, and `yq` for YAML instead of Python or `sed` one-liners.",
   "Scope shell searches to the project or a known folder, never the whole home directory or `/`.",

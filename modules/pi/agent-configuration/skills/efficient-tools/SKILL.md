@@ -1,6 +1,6 @@
 ---
 name: efficient-repository-workflow
-description: Choose between search, read, edit, run, and web research tools for repository work and external questions.
+description: Choose between search, read, edit, bash, and web research tools for repository work and external questions.
 ---
 
 # Efficient repository workflow
@@ -25,11 +25,11 @@ Use this skill to choose the right tool for a repository question or external re
 | Find a code _shape_ such as calls regardless of whitespace | `search` with `kind: "structural"` if supported                                                                           | ast-grep with a valid language and pattern; otherwise a bounded text search with manual review | A regex match claimed to prove syntax or behavior                                                           |
 | Understand a known file or function                        | `read` by symbol or bounded `offset`/`limit`                                                                              | Native file reader with line ranges; shell `sed -n '20,80p' path` only if no reader exists     | Full-file `cat` or unbounded output when a slice suffices                                                   |
 | Change code or prose                                       | `edit` with exact `oldText` and `newText`, or create/move/delete as needed                                                | Native patch/editor tool; shell redirection only if no edit tool exists                        | Editing before reading the relevant slice; replacing unrelated occurrences                                  |
-| Inspect JSON/YAML or package scripts                       | `read` a small section; use `run` with `jq`/`yq` if an actual structured query is needed                                  | Native structured-data tool                                                                    | Dumping entire config files for one key                                                                     |
-| Inspect working-tree changes                               | `run` with `git status --short` and `git diff -- path` (or native git tools)                                              | Native diff/status tool                                                                        | Assuming a clean tree, overwriting user changes, or reviewing only unstaged diff when staged changes matter |
+| Inspect JSON/YAML or package scripts                       | `read` a small section; use `bash` with `jq`/`yq` if an actual structured query is needed                                  | Native structured-data tool                                                                    | Dumping entire config files for one key                                                                     |
+| Inspect working-tree changes                               | `bash` with `git status --short` and `git diff -- path` (or native git tools)                                              | Native diff/status tool                                                                        | Assuming a clean tree, overwriting user changes, or reviewing only unstaged diff when staged changes matter |
 | Research external/current facts                            | `web_search` to find sources, `fetch_content` for selected pages, `get_search_content` for stored passages, `source_check` for claim evidence | Host web tools when permitted | Treating search snippets as verified documentation |
 
-`run` is for shell-only operations such as Git, scripts, and commands without a dedicated tool. It is not a substitute for `search`, `read`, or `edit`. For external information, follow the `web-research` skill.
+`bash` is for shell-only operations such as Git, scripts, and commands without a dedicated tool. It is not a substitute for `search`, `read`, or `edit`. For external information, follow the `web-research` skill.
 
 ## How to read results
 
@@ -53,7 +53,7 @@ Question: "Where is the web app's package script?" Call `search({query:"package.
 
 ### Handle a missing or deleted path
 
-Question: "Why can't I read a known reference?" If `read({path:"docs/references/primitives.md"})` returns `ENOENT`, use `run` for `git status --short -- docs/references/primitives.md`.
+Question: "Why can't I read a known reference?" If `read({path:"docs/references/primitives.md"})` returns `ENOENT`, use `bash` for `git status --short -- docs/references/primitives.md`.
 
 - Correct: a status line starting with ` D` explains that a tracked file is deleted in the working tree. Preserve the deletion unless the user asks to restore it; remove stale references in the file you are authorized to edit.
 - Incorrect: `ENOENT` is reported as proof the file never existed, or `git checkout` silently restores it.
@@ -68,7 +68,7 @@ Question: "Which calls use `parse`?" Start with a bounded text or structural sea
 
 ### Edit a known file
 
-Question: "Change a line in this skill." Read its relevant lines, check `git status --short`, apply one exact `edit` replacement, then inspect the scoped diff with `run`.
+Question: "Change a line in this skill." Read its relevant lines, check `git status --short`, apply one exact `edit` replacement, then inspect the scoped diff with `bash`.
 
 - Correct: the diff contains only the intended lines.
 - Incorrect: `replaceAll` changes other examples too, or another person's deletions are silently restored.

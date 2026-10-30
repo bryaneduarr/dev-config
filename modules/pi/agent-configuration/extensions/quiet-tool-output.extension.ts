@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { CONFIG_DIR_NAME, type ExtensionAPI, type ToolResultEvent } from "@earendil-works/pi-coding-agent";
 
 // Must match HARNESS_TOOLS; this file is installed apart from the harness and cannot import it.
-const SELF_BOUNDED_TOOLS: ReadonlySet<string> = new Set(["search", "read", "edit", "run"]);
+const SELF_BOUNDED_TOOLS: ReadonlySet<string> = new Set(["search", "read", "edit", "bash"]);
 const MAX_CHARS = 12_000;
 const MAX_LINES = 240;
 const PREVIEW_CHAR_LIMIT = 12_000;
