@@ -27,7 +27,7 @@ export function createSubagentRegistry(): SubagentRegistry {
   };
 
   return {
-    create(request, ctx, onProgress) {
+    create(request, ctx) {
       const id = randomUUID();
       const controller = new AbortController();
       const resolvedRole = resolveTaskRole(request);
@@ -43,14 +43,12 @@ export function createSubagentRegistry(): SubagentRegistry {
             if (!run) return;
 
             run.progress = nextProgress;
-            onProgress(nextProgress);
           },
         });
       const execute = () => runningSlots.run(runInSlot);
       const result = resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementSlots.run(execute) : execute();
 
       runsById.set(id, { controller, progress, result });
-      onProgress(progress);
 
       void result.catch(() => {
         const run = runsById.get(id);
@@ -63,7 +61,7 @@ export function createSubagentRegistry(): SubagentRegistry {
         };
       });
 
-      return { id, result };
+      return { id, progress, result };
     },
     status(id) {
       const run = runsById.get(id);
@@ -75,11 +73,6 @@ export function createSubagentRegistry(): SubagentRegistry {
       return [...runsById.values()].map((run) => run.progress);
     },
     cancel,
-    cancelAll() {
-      for (const id of runsById.keys()) {
-        cancel(id);
-      }
-    },
     clear() {
       for (const id of runsById.keys()) {
         cancel(id);

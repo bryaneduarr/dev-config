@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { renderSubagentCard } from "../../components/subagents/subagent-card.component.ts";
 import { EMPTY } from "../../components/tool-rendering/empty.component.ts";
+import { SUBAGENT_REPORT_MESSAGE_TYPE } from "../../constants/subagents/registry/subagent-report.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles/roles.constant.ts";
 import {
   TASK_PROMPT_GUIDELINES,
@@ -10,10 +11,12 @@ import {
 } from "../../constants/subagents/tasks/run/tool-description.constant.ts";
 import { TaskParams } from "../../schemas/subagents/tasks/run/task-params.schema.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
+import { resolveLiveTaskProgress } from "../../services/subagents/card/resolve-live-task-progress.service.ts";
+import { readSubagentCapacity } from "../../services/subagents/registry/read-subagent-capacity.service.ts";
+import { formatTaskLaunchText } from "../../services/subagents/result/format-task-launch-text.service.ts";
 import { readTaskProgress } from "../../services/subagents/tasks/progress/read-task-progress.service.ts";
-import { executeTaskCall } from "../../services/subagents/tasks/run/execute-task-call.service.ts";
+import { reportFinishedSubagent } from "../../services/subagents/tasks/run/report-finished-subagent.service.ts";
 import { toTaskRequest } from "../../services/subagents/tasks/run/to-task-request.service.ts";
-import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
 import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
 
 export function registerTaskTool(pi: ExtensionAPI): void {
@@ -43,23 +46,27 @@ export function registerTaskTool(pi: ExtensionAPI): void {
         theme,
         toolCallId: context.toolCallId,
         title: context.args.title,
-        progressLookup: readTaskProgress(toolResult.details),
+        progressLookup: resolveLiveTaskProgress(subagentRegistry, readTaskProgress(toolResult.details)),
         lastComponent: toValueState(context.lastComponent),
       });
     },
-    async execute(_toolCallId, params, signal, onUpdate, ctx) {
-      const outcome = await executeTaskCall({
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const handle = subagentRegistry.create(toTaskRequest(params), ctx);
+      reportFinishedSubagent({
         registry: subagentRegistry,
-        request: toTaskRequest(params),
-        ctx,
-        cancellation: toToolCancellation(signal),
-        onProgress: (progress) => {
-          if (onUpdate === undefined) return;
-          onUpdate({ content: [{ type: "text", text: progress.currentTask }], details: progress });
-        },
+        handle,
+        onFinished: (report) =>
+          pi.sendMessage(
+            { customType: SUBAGENT_REPORT_MESSAGE_TYPE, content: report.text, display: false, details: report.details },
+            { triggerTurn: true, deliverAs: "followUp" },
+          ),
       });
+      const capacity = readSubagentCapacity(subagentRegistry.list());
 
-      return { content: [{ type: "text", text: outcome.text }], details: outcome.details };
+      return {
+        content: [{ type: "text", text: formatTaskLaunchText(handle.progress, capacity) }],
+        details: handle.progress,
+      };
     },
   });
 }
