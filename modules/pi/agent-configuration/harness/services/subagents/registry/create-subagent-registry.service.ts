@@ -30,7 +30,7 @@ export function createSubagentRegistry(): SubagentRegistry {
   };
 
   return {
-    create(request, ctx) {
+    create(request, ctx, onProgress) {
       const id = randomUUID();
       const controller = new AbortController();
       const resolvedRole = resolveTaskRole(request);
@@ -45,9 +45,8 @@ export function createSubagentRegistry(): SubagentRegistry {
           signal: controller.signal,
           onProgress: (nextProgress) => {
             const run = runsById.get(id);
-            if (!run) return;
-
-            run.progress = nextProgress;
+            if (run !== undefined) run.progress = nextProgress;
+            onProgress(nextProgress);
           },
         });
       };
