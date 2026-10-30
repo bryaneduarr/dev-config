@@ -9,7 +9,7 @@ Personal development environment for Ubuntu 26.04 on WSL2. Each module installs 
 
 | Module | Installs |
 | --- | --- |
-| `rust` | Rust stable with clippy, rustfmt, rust-analyzer, wasm, aarch64 and Android targets, and `dx`, `just`, `bacon`, `cargo-nextest`, `cargo-zigbuild` |
+| `rust` | Rust stable with clippy, rustfmt, rust-analyzer, llvm-tools, wasm, aarch64 and Android targets, and `dx`, `just`, `bacon`, `cargo-nextest`, `cargo-zigbuild`, `cargo-llvm-cov`, `cargo-deny` |
 | `android` | JDK 17, Android SDK, NDK, emulator, the `pixel-7-android-36` virtual device, and `~/.config/android/environment.sh` sourced from `~/.bashrc` |
 | `herdr` | Herdr binary and `~/.config/herdr/config.toml` (also installs `rust`) |
 | `tmux` | tmux, TPM (pinned), plugins, `~/.config/tmux/tmux.conf` |

@@ -7,9 +7,9 @@ repository_dir="$(cd "$module_dir/../.." && pwd)"
 readonly repository_dir
 readonly cargo_bin_dir="$HOME/.cargo/bin"
 readonly cargo_binstall_version=1.26.1
-readonly -a rust_components=(clippy rustfmt rust-analyzer)
+readonly -a rust_components=(clippy rustfmt rust-analyzer llvm-tools)
 readonly -a rust_targets=(wasm32-unknown-unknown aarch64-unknown-linux-gnu aarch64-linux-android x86_64-linux-android)
-readonly -a cargo_tools=(dioxus-cli@0.7.10 just@1.59.0 bacon@3.26.0 cargo-nextest@0.9.150 cargo-zigbuild@0.24.0)
+readonly -a cargo_tools=(dioxus-cli@0.7.10 just@1.59.0 bacon@3.26.0 cargo-nextest@0.9.150 cargo-zigbuild@0.24.0 cargo-llvm-cov@0.9.1 cargo-deny@0.20.2)
 readonly -a desktop_webview_packages=(
   build-essential pkg-config libssl-dev libgtk-3-dev libwebkit2gtk-4.1-dev
   libayatana-appindicator3-dev librsvg2-dev libxdo-dev
