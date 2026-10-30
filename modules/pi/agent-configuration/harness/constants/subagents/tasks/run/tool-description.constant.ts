@@ -1,23 +1,21 @@
 import { MAX_RUNNING_SUBAGENTS } from "./task-limit.constant.ts";
 
 export const TASK_TOOL_DESCRIPTION = [
-  "Run an isolated subagent with a mission, optional role, context, model, reasoning, tools, and skills.",
-  "Explore and verify roles stay read-only, and implementation workers run one at a time.",
+  "Run an isolated subagent with a mission, optional role, context, working directory, model, reasoning, tools, and skills.",
+  "Explore and verify roles stay read-only. In a git repository each implement worker edits its own checkout on its own branch, so implement workers run in parallel.",
   `Returns immediately: the subagent runs in the background and its structured result arrives later as a message. At most ${MAX_RUNNING_SUBAGENTS} subagents run at once; a launch beyond that waits for a free slot.`,
   "Subagents use the same read, search, and bash tools as you, including their batching.",
 ].join(" ");
 
 export const TASK_PROMPT_GUIDELINES = [
-  "Keep orchestration thin: delegate the work, do not repeat it. Read a subagent's result instead of re-reading the files it already summarised, and do cheap lookups yourself instead of starting a subagent for them.",
-  "Use task for bounded independent work. Give it a short title and one specific mission.",
-  "Choose explore, implement, or verify when the mission fits that role. Omit role to keep generic task behavior. Use explore or verify for reviews and audits; do not give review workers edit or write tools.",
-  "Set model to a cheaper model for explore and verify workers; keep the strongest model for implement workers and for your own decisions.",
-  "Specify only the context, tools, and skills the subagent needs. It does not inherit this conversation, so name the files, rules, and commands it needs in the mission.",
-  "List exact verificationCommands for implement or verify workers that need to run checks.",
-  `Keep up to ${MAX_RUNNING_SUBAGENTS} subagents running. Launch as many independent missions as there are free slots, in one response. Each task call reports the running count and free slots.`,
-  "Do not poll or wait for subagents. When nothing else needs doing, end your turn; each result arrives as a message. When one arrives, read it, then launch a replacement for any remaining independent work. Give the final answer only after every launched subagent has reported.",
-  "Implement workers share one slot.",
+  "Give each worker one goal, a short title, and only the files, rules, and context it needs; it does not inherit this conversation.",
+  "A mission that needs another's result or edits waits for that result, and you pass what it needs in its context. Missions that edit the same files do not run in parallel.",
+  `Launch ready missions together in one response, up to ${MAX_RUNNING_SUBAGENTS} slots. Each result arrives as a message, so do not poll.`,
+  "Write exact signatures, names, and file ownership into every mission up front. Name a worker only if it may need to coordinate: it then gets message_team, an unnamed one cannot message anyone. Set talksTo to the teammates it depends on. Answer a worker with message_subagent only when that unblocks it.",
+  "Implement workers run in parallel, each in a private git checkout of the current commit (without uncommitted changes), and report a branch: merge it with git merge, one at a time, and resolve conflicts before launching dependent work. Outside a git repository they run one at a time.",
+  "Choose explore, implement, or verify when it fits; reviews are read-only. Leave model and reasoning unset to inherit yours; set either only when the user named it, and use exactly that.",
+  "Set cwd to run a worker in a project folder. List exact verificationCommands for workers that run checks; a reviewer needs read-only commands such as git status and git diff approved.",
 ];
 
 export const TASK_TOOL_LABEL = "Subagent";
-export const TASK_PROMPT_SNIPPET = "Delegate a bounded mission to a subagent with a selected role";
+export const TASK_PROMPT_SNIPPET = "Run a bounded mission in a subagent with a selected role";

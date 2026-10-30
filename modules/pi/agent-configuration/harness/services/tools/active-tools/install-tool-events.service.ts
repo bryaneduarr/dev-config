@@ -1,11 +1,12 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
+import { MESSAGE_SUBAGENT_TOOL_NAME } from "../../../constants/subagents/team/team.constant.ts";
 import { HARNESS_TOOLS, WEB_TOOLS } from "../../../constants/tools/active-tools/harness-tools.constant.ts";
 import { enforceActiveTools } from "./enforce-active-tools.service.ts";
 import { isMcpTool } from "./is-mcp-tool.service.ts";
 import { writeStatusFile } from "./write-status-file.service.ts";
 
-const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, ...WEB_TOOLS]);
+const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, MESSAGE_SUBAGENT_TOOL_NAME, ...WEB_TOOLS]);
 
 export function installToolEvents(pi: ExtensionAPI): void {
   pi.on("session_start", async () => {

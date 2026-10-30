@@ -5,9 +5,11 @@ import { registerSubagentCancelCommand } from "./commands/subagent-cancel/subage
 import { registerSubagentStatusCommand } from "./commands/subagent-status/subagent-status.command.ts";
 import { installSessions } from "./services/sessions/install/install-sessions.service.ts";
 import { installSubagentEvents } from "./services/subagents/events/install-subagent-events.service.ts";
+import { installTeamEscalation } from "./services/subagents/team/install-team-escalation.service.ts";
 import { installHarnessPresentation } from "./services/tool-rendering/install-harness-presentation.service.ts";
 import { installToolEvents } from "./services/tools/active-tools/install-tool-events.service.ts";
 import { registerEditTool } from "./tools/edit/edit.tool.ts";
+import { registerMessageSubagentTool } from "./tools/message-subagent/message-subagent.tool.ts";
 import { registerReadTool } from "./tools/read/read.tool.ts";
 import { registerRunTool } from "./tools/run/run.tool.ts";
 import { registerSearchTool } from "./tools/search/search.tool.ts";
@@ -20,6 +22,8 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   registerRunTool(pi);
 
   registerTaskTool(pi);
+  registerMessageSubagentTool(pi);
+  installTeamEscalation(pi);
   registerSubagentStatusCommand(pi);
   registerSubagentCancelCommand(pi);
   installSubagentEvents(pi);

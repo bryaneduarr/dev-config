@@ -7,6 +7,7 @@ import {
   TASK_TIMEOUT_MIN_MS,
   TASK_TITLE_MAX_LENGTH,
 } from "../../../../constants/subagents/tasks/run/task-limit.constant.ts";
+import { TEAM_MESSAGE_TOOL_NAME, TEAM_NAME_PATTERN } from "../../../../constants/subagents/team/team.constant.ts";
 
 export const TaskParams = Type.Object({
   /** Label shown for the worker in the conversation and status list. */
@@ -32,16 +33,37 @@ export const TaskParams = Type.Object({
       description: "Only the background needed for this mission. No parent transcript is inherited.",
     }),
   ),
+  /** Name that lets teammates and the orchestrator message the worker. */
+  name: Type.Optional(
+    Type.String({
+      pattern: TEAM_NAME_PATTERN,
+      description: `Short lowercase name, unique among running subagents. Set only for a worker that may need to coordinate; it then gets the ${TEAM_MESSAGE_TOOL_NAME} tool.`,
+    }),
+  ),
+  /** Names of the teammates the worker may message. */
+  talksTo: Type.Optional(
+    Type.Array(Type.String({ pattern: TEAM_NAME_PATTERN }), {
+      uniqueItems: true,
+      description: "Names of the teammates this worker depends on or must agree with. The link works both ways.",
+    }),
+  ),
+  /** Directory the worker runs in. */
+  cwd: Type.Optional(
+    Type.String({
+      description: "Directory the worker runs in, absolute or relative to the current directory. Defaults to it.",
+    }),
+  ),
   /** Provider and model identifier for the worker. */
   model: Type.Optional(
     Type.String({
-      description: "Optional provider/model ID. Defaults to the current model.",
+      description:
+        "Provider/model ID. Set only when the user named a model; otherwise omit to inherit the current one.",
     }),
   ),
   /** Reasoning level for the worker. */
   reasoning: Type.Optional(
     StringEnum(REASONING_LEVELS, {
-      description: "Optional reasoning level. Defaults to the current level.",
+      description: "Reasoning level. Set only when the user named one; otherwise omit to inherit the current one.",
     }),
   ),
   /** Tools the worker may call. */

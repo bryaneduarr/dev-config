@@ -69,3 +69,14 @@ test("a failed operation still frees its slot", async () => {
   expect(failed).rejects.toThrow("failed");
   expect(await next).toBe("ran");
 });
+
+test("an operation that finds a free slot starts before run returns", () => {
+  const limiter = createSlotLimiter(1);
+  const started: string[] = [];
+
+  void limiter.run(async () => {
+    started.push("first");
+  });
+
+  expect(started).toEqual(["first"]);
+});

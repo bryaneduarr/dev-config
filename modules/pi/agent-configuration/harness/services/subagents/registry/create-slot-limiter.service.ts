@@ -4,17 +4,6 @@ export function createSlotLimiter(capacity: number): SlotLimiter {
   let occupiedSlots = 0;
   const waitingForSlot: Array<() => void> = [];
 
-  const acquireSlot = async (): Promise<void> => {
-    if (occupiedSlots < capacity) {
-      occupiedSlots += 1;
-      return;
-    }
-
-    await new Promise<void>((resolve) => {
-      waitingForSlot.push(resolve);
-    });
-  };
-
   const releaseSlot = (): void => {
     const nextWaiting = waitingForSlot.shift();
     if (nextWaiting === undefined) {
@@ -25,15 +14,24 @@ export function createSlotLimiter(capacity: number): SlotLimiter {
     nextWaiting();
   };
 
-  return {
-    async run<T>(operation: () => Promise<T>): Promise<T> {
-      await acquireSlot();
+  const runAndRelease = async <T>(operation: () => Promise<T>): Promise<T> => {
+    try {
+      return await operation();
+    } finally {
+      releaseSlot();
+    }
+  };
 
-      try {
-        return await operation();
-      } finally {
-        releaseSlot();
+  return {
+    run<T>(operation: () => Promise<T>): Promise<T> {
+      if (occupiedSlots < capacity) {
+        occupiedSlots += 1;
+        return runAndRelease(operation);
       }
+
+      return new Promise<void>((resolve) => {
+        waitingForSlot.push(resolve);
+      }).then(() => runAndRelease(operation));
     },
   };
 }

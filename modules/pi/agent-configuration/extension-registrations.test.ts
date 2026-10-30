@@ -13,6 +13,7 @@ const HARNESS_REGISTRATIONS = [
   "tool:edit",
   "tool:bash",
   "tool:task",
+  "tool:message_subagent",
   "command:subagent-status",
   "command:subagent-cancel",
   "event:session_start",

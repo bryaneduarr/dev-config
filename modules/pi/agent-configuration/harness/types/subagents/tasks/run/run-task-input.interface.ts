@@ -1,5 +1,6 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { SubagentProgressListener } from "../../registry/subagent-progress-listener.interface.ts";
+import type { TeamMailbox } from "../../team/team-mailbox.interface.ts";
 import type { TaskRequest } from "./task-request.interface.ts";
 
 /** Inputs that run one subagent task to completion. */
@@ -8,10 +9,12 @@ export interface RunTaskInput {
   readonly id: string;
   /** Validated request the worker carries out. */
   readonly request: TaskRequest;
-  /** Parent context that supplies the working directory, model, and system prompt. */
+  /** Parent context that supplies the model and system prompt. */
   readonly ctx: ExtensionContext;
   /** Signal that aborts the worker when the parent cancels. */
   readonly signal: AbortSignal;
+  /** Mailbox that lets a named worker message its teammates. */
+  readonly mailbox: TeamMailbox;
   /** Receives each new progress snapshot. */
   readonly onProgress: SubagentProgressListener;
 }

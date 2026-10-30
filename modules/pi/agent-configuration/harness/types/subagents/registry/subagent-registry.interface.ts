@@ -1,7 +1,9 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 import type { TaskProgress } from "../tasks/progress/task-progress.interface.ts";
 import type { TaskProgressLookup } from "../tasks/progress/task-progress-lookup.interface.ts";
 import type { TaskRequest } from "../tasks/run/task-request.interface.ts";
+import type { SubagentCapacity } from "./subagent-capacity.interface.ts";
 import type { SubagentHandle } from "./subagent-handle.interface.ts";
 import type { SubagentProgressListener } from "./subagent-progress-listener.interface.ts";
 
@@ -13,6 +15,10 @@ export interface SubagentRegistry {
   status(id: string): TaskProgressLookup;
   /** Lists the progress of every known run. */
   list(): readonly TaskProgress[];
+  /** Counts the running and waiting runs and the slots still free. */
+  capacity(): SubagentCapacity;
+  /** Milliseconds a run waited for its slot; absent for an unknown run or one still waiting. */
+  slotWait(id: string): ValueState<number>;
   /** Requests cancellation of a running run; reports whether one was running. */
   cancel(id: string): boolean;
   /** Cancels every run and forgets them. */

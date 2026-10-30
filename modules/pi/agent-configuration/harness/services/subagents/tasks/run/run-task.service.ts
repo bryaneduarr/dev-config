@@ -17,6 +17,9 @@ import { toValueState } from "../../../activity/value/to-value-state.service.ts"
 import { parseTaskOutput } from "../../result/parse-task-output.service.ts";
 import { buildTaskSystemPrompt } from "../../roles/build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "../../roles/resolve-task-role.service.ts";
+import { createTeamTools } from "../../team/create-team-tools.service.ts";
+import { joinTeam } from "../../team/join-team.service.ts";
+import { readUnreadTeamMessageRisks } from "../../team/read-unread-team-message-risks.service.ts";
 import { finalAssistantText } from "../messages/final-assistant-text.service.ts";
 import { readAssistantOutcome } from "../messages/read-assistant-outcome.service.ts";
 import { usageFromMessages } from "../messages/usage-from-messages.service.ts";
@@ -54,7 +57,7 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
     currentModel: toValueState(ctx.model),
   });
   const resourceLoader = await createTaskResourceLoader({
-    cwd: ctx.cwd,
+    cwd: request.cwd,
     systemPrompt: composeTaskSystemPrompt({
       provider: model.provider,
       parentPrompt: ctx.getSystemPrompt(),
@@ -62,9 +65,13 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
     }),
     skillNames: request.skills.state === "present" ? request.skills.value : [],
   });
-  const toolSet = createChildToolSet(resolvedRole.tools, resolvedRole.verificationCommands);
+  const toolSet = createChildToolSet(
+    resolvedRole.tools,
+    resolvedRole.verificationCommands,
+    createTeamTools(input.mailbox, id, request),
+  );
   const session = await createTaskSession({
-    cwd: ctx.cwd,
+    cwd: request.cwd,
     model,
     runtime,
     thinkingLevel:
@@ -83,9 +90,10 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
   };
   const publish = () => onProgress({ ...progress, activity: [...progress.activity] });
   const unsubscribe = trackTaskProgress({ session, progress, publish });
-  publish();
 
   try {
+    joinTeam({ mailbox: input.mailbox, runId: id, request, session });
+    publish();
     const promptOutcome = await promptTaskSession({
       session,
       prompt: taskPrompt(request),
@@ -93,6 +101,7 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
       timeoutMs: request.timeoutMs,
     });
 
+    input.mailbox.leave(id);
     progress.usage = {
       usageState: "reported",
       usage: usageFromMessages(session.messages, readContextTokens(session)),
@@ -127,10 +136,13 @@ export async function runTask(input: RunTaskInput): Promise<TaskResult> {
     return {
       ...progress,
       ...parsedOutput,
+      risks: [...parsedOutput.risks, ...readUnreadTeamMessageRisks(session)],
       errors,
+      branch: { state: "absent" },
     };
   } finally {
     unsubscribe();
+    input.mailbox.leave(id);
     session.dispose();
   }
 }

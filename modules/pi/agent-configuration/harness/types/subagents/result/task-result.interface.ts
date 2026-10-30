@@ -1,3 +1,4 @@
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 import type { TaskProgress } from "../tasks/progress/task-progress.interface.ts";
 
 /** Final report of a finished subagent run. */
@@ -16,4 +17,6 @@ export interface TaskResult extends TaskProgress {
   readonly risks: readonly string[];
   /** Errors the worker or run reported. */
   readonly errors: readonly string[];
+  /** Branch holding the worker's committed changes, for a worker that ran in its own checkout. */
+  readonly branch: ValueState<string>;
 }

@@ -13,10 +13,10 @@ import { TaskParams } from "../../schemas/subagents/tasks/run/task-params.schema
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { mirrorSubagentProgress } from "../../services/subagents/activity/mirror-subagent-progress.service.ts";
 import { resolveLiveTaskProgress } from "../../services/subagents/card/resolve-live-task-progress.service.ts";
-import { readSubagentCapacity } from "../../services/subagents/registry/read-subagent-capacity.service.ts";
 import { formatTaskLaunchText } from "../../services/subagents/result/format-task-launch-text.service.ts";
 import { readTaskProgress } from "../../services/subagents/tasks/progress/read-task-progress.service.ts";
 import { reportFinishedSubagent } from "../../services/subagents/tasks/run/report-finished-subagent.service.ts";
+import { resolveTaskCwd } from "../../services/subagents/tasks/run/resolve-task-cwd.service.ts";
 import { toTaskRequest } from "../../services/subagents/tasks/run/to-task-request.service.ts";
 import { activityStore } from "../../stores/activity/activity.store.ts";
 import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
@@ -53,7 +53,10 @@ export function registerTaskTool(pi: ExtensionAPI): void {
       });
     },
     async execute(toolCallId, params, _signal, _onUpdate, ctx) {
-      const handle = subagentRegistry.create(toTaskRequest(params), ctx, (progress) =>
+      const cwd = await resolveTaskCwd(ctx.cwd, toValueState(params.cwd));
+      if (cwd.state === "invalid") throw new Error(cwd.message);
+
+      const handle = subagentRegistry.create(toTaskRequest(params, cwd.path), ctx, (progress) =>
         mirrorSubagentProgress({ store: activityStore, toolCallId, progress, endedAt: Date.now() }),
       );
       reportFinishedSubagent({
@@ -65,7 +68,7 @@ export function registerTaskTool(pi: ExtensionAPI): void {
             { triggerTurn: true, deliverAs: "followUp" },
           ),
       });
-      const capacity = readSubagentCapacity(subagentRegistry.list());
+      const capacity = subagentRegistry.capacity();
 
       return {
         content: [{ type: "text", text: formatTaskLaunchText(handle.progress, capacity) }],

@@ -11,6 +11,12 @@ export interface TaskRequest extends TaskRoleInput {
   readonly title: string;
   /** Instruction the isolated worker carries out. */
   readonly mission: string;
+  /** Name that lets teammates and the orchestrator message the worker. */
+  readonly name: ValueState<string>;
+  /** Names of the teammates the worker may message. */
+  readonly talksTo: ValueState<readonly string[]>;
+  /** Absolute directory the worker runs in. */
+  readonly cwd: string;
   /** Background the worker needs; the parent transcript is never inherited. */
   readonly context: ValueState<string>;
   /** Provider and model identifier requested for the worker. */

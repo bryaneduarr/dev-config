@@ -1,3 +1,4 @@
+import { MAX_RUNNING_SUBAGENTS } from "../../../../constants/subagents/tasks/run/task-limit.constant.ts";
 import type { SubagentHandle } from "../../../../types/subagents/registry/subagent-handle.interface.ts";
 import type { SubagentRegistry } from "../../../../types/subagents/registry/subagent-registry.interface.ts";
 import type { TaskResult } from "../../../../types/subagents/result/task-result.interface.ts";
@@ -23,10 +24,13 @@ export function succeededResult(progress: TaskProgress): TaskResult {
     filesChanged: [],
     risks: [],
     errors: [],
+    branch: { state: "absent" },
   };
 }
 
 export function registryOf(runs: readonly TaskProgress[]): SubagentRegistry {
+  const running = runs.filter((candidate) => candidate.status === "running").length;
+
   const unavailable = (): never => {
     throw new Error("not used by this test");
   };
@@ -39,6 +43,8 @@ export function registryOf(runs: readonly TaskProgress[]): SubagentRegistry {
       return run === undefined ? { found: false } : { found: true, progress: run };
     },
     list: () => runs,
+    capacity: () => ({ running, queued: 0, freeSlots: MAX_RUNNING_SUBAGENTS - running }),
+    slotWait: () => ({ state: "absent" }),
     cancel: unavailable,
     clear: unavailable,
   };
