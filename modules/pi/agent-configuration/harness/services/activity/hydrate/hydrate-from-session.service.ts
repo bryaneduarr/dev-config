@@ -1,14 +1,20 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { SUBAGENT_REPORT_MESSAGE_TYPE } from "../../../constants/subagents/registry/subagent-report.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { isRecord } from "../../values/is-record.service.ts";
 import { recordUserMessage } from "../record/record-user-message.service.ts";
 import { hydrateAssistantMessage } from "./hydrate-assistant-message.service.ts";
+import { hydrateSubagentReport } from "./hydrate-subagent-report.service.ts";
 import { hydrateToolResult } from "./hydrate-tool-result.service.ts";
 import { parseTimestamp } from "./parse-timestamp.service.ts";
 
 export function hydrateFromSession(ctx: ExtensionContext): void {
   activityStore.clear();
   for (const entry of ctx.sessionManager.getBranch()) {
+    if (entry.type === "custom_message" && entry.customType === SUBAGENT_REPORT_MESSAGE_TYPE) {
+      hydrateSubagentReport(entry.details, parseTimestamp(entry.timestamp));
+      continue;
+    }
     if (entry.type !== "message" || !isRecord(entry.message)) continue;
     const startedAt = parseTimestamp(entry.timestamp);
     const message: Readonly<Record<string, unknown>> = entry.message;
