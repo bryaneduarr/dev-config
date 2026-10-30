@@ -17,6 +17,7 @@ const HARNESS_REGISTRATIONS = [
   "command:subagent-cancel",
   "event:session_start",
   "event:session_shutdown",
+  "event:agent_settled",
   "entry-renderer:harness-activity-summary",
   "event:message_start",
   "event:message_update",

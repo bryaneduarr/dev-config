@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles/roles.constant.ts";
-import { STOPPED_TASK_LABEL } from "../../../constants/subagents/tasks/progress/progress.constant.ts";
+import {
+  CANCELLED_BEFORE_START_ERROR_MESSAGE,
+  STOPPED_TASK_LABEL,
+} from "../../../constants/subagents/tasks/progress/progress.constant.ts";
 import {
   MAX_RUNNING_IMPLEMENT_SUBAGENTS,
   MAX_RUNNING_SUBAGENTS,
@@ -32,8 +35,10 @@ export function createSubagentRegistry(): SubagentRegistry {
       const controller = new AbortController();
       const resolvedRole = resolveTaskRole(request);
       const progress = createTaskProgress(id, request.title, resolvedRole);
-      const runInSlot = () =>
-        runTask({
+      const runInSlot = async () => {
+        if (controller.signal.aborted) throw new Error(CANCELLED_BEFORE_START_ERROR_MESSAGE);
+
+        return runTask({
           id,
           request,
           ctx,
@@ -45,6 +50,7 @@ export function createSubagentRegistry(): SubagentRegistry {
             run.progress = nextProgress;
           },
         });
+      };
       const execute = () => runningSlots.run(runInSlot);
       const result = resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementSlots.run(execute) : execute();
 
