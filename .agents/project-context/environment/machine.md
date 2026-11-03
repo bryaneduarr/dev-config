@@ -1,6 +1,7 @@
 # Machine
-- Stamp: 2026-10-28 UTC, rev 2df21a9, many uncommitted changes (code in flux).
-- User-confirmed: Ubuntu 26.04, x86_64, WSL2 only; no aarch64 for now.
-- User-confirmed: Nix rules kept only for possible future .nix files; none exist (source-inspected: no .nix in repo).
-- Source-inspected: [AGENTS.md](../../../AGENTS.md) forbids other distributions, architectures, native desktop.
-- Installers change the machine; do not run unless asked.
+- Stamp: 2026-10-30 UTC, rev f950690 plus uncommitted arm64 support.
+- User-confirmed: Ubuntu 26.04 WSL2, x86_64 and arm64; this machine is aarch64.
+- Source: CPU detection in [lib/common.sh](../../../lib/common.sh); `x86_64_only_modules` in [install.sh](../../../install.sh).
+- Checked: Google ships no Linux arm64 emulator, NDK, platform-tools; Mason clangd lacks linux arm64; Pi images are multi-arch.
+- Nix rules kept for possible future .nix files; none exist.
+- sudo needs a password; run installers only when asked.

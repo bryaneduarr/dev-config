@@ -1,6 +1,6 @@
 # Scripts and tests
 
-These rules are mandatory for shell scripts, standalone TypeScript tools, and tests. The machine is Ubuntu 26.04 x86_64 under WSL2; scripts target only it.
+These rules are mandatory for shell scripts, standalone TypeScript tools, and tests. The machine is Ubuntu 26.04 under WSL2 on x86_64 or arm64; scripts target only those and work on both.
 
 ## Choose the language
 

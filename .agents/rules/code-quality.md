@@ -94,7 +94,7 @@ Agents cannot see editor diagnostics, so they run the command-line equivalent of
 
 When valid approaches conflict, prefer, in order:
 
-1. Correct behavior on Ubuntu 26.04 x86_64 under WSL2.
+1. Correct behavior on Ubuntu 26.04 under WSL2, on both x86_64 and arm64.
 2. Type safety: strict TypeScript, checked shell.
 3. Clear responsibility boundaries.
 4. Readability.

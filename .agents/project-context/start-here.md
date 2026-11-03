@@ -1,5 +1,5 @@
 # Start here
-- [Environment](environment/machine.md): Ubuntu 26.04, WSL2, x86_64.
+- [Environment](environment/machine.md): Ubuntu 26.04, WSL2, x86_64 or arm64 (detected).
 - [Install flow](install/install-flow.md): bootstrap, install, paths.
 - Modules: [herdr-tmux-yazi](modules/terminal-tools.md), [neovim](modules/neovim.md), [pi](modules/pi-harness.md) ([tools](modules/pi-harness-tools.md)), [agents](modules/agents-command.md), [bash](modules/bash-aliases.md), [rust-android](modules/rust-android.md)
 - [Verification](verification/check-code.md): check-code, rule-audit, bun test.

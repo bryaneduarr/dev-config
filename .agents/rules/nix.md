@@ -1,6 +1,6 @@
 # Nix
 
-These rules are mandatory for every `.nix` file. The repository has no Nix files today and installs through bash; these rules apply if Nix is introduced, and then only for `x86_64-linux` on Ubuntu 26.04 under WSL2.
+These rules are mandatory for every `.nix` file. The repository has no Nix files today and installs through bash; these rules apply if Nix is introduced, and then only for `x86_64-linux` and `aarch64-linux` on Ubuntu 26.04 under WSL2.
 
 ## Typed feature options
 
@@ -50,4 +50,4 @@ Run on every changed Nix file before completion:
 - `nixfmt` to format and `nixfmt --check` to verify.
 - `statix check <file>`, fixing all diagnostics, plus a manual check for mixed parent-set and dotted declarations.
 - `deadnix <file>`, removing unused bindings and arguments.
-- Evaluation of the `x86_64-linux` output and the `*.test.nix` files next to the changed modules. For structure-only changes, compare evaluated settings before and after to confirm unchanged behavior.
+- Evaluation of the `x86_64-linux` and `aarch64-linux` outputs and the `*.test.nix` files next to the changed modules. For structure-only changes, compare evaluated settings before and after to confirm unchanged behavior.

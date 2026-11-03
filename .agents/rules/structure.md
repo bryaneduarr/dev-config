@@ -18,7 +18,8 @@ modules/<module>/            Everything one program or tool needs: install.sh, c
 - Configuration a module links into `$HOME` stays in the module folder and is linked, not copied, so edits apply immediately. Neovim's configuration lives in `modules/neovim/config/`.
 - The Pi harness keeps its TypeScript source, settings, and installer together in `modules/pi/`; the `agents` command keeps its own in `modules/agents/`.
 - `.agents/` stays agent-facing. Nothing installs or imports its skills or rules.
-- The target is Ubuntu 26.04 on WSL2, x86_64 only. Do not add code for other distributions, architectures, or a native desktop.
+- The target is Ubuntu 26.04 on WSL2, on x86_64 and arm64 (aarch64). Do not add code for other distributions, architectures, or a native desktop.
+- Installers detect the CPU once in `lib/common.sh`: `release_architecture` (`x86_64` or `aarch64`) and `node_architecture` (`x64` or `arm64`). Choose architecture-specific downloads from these, never a hard-coded name. A module that upstream cannot support on arm64 goes in `x86_64_only_modules` in `install.sh`, which skips it for `all` on arm64.
 
 ## Choose the deepest meaningful owner
 

@@ -42,7 +42,7 @@ The new session's orchestrator never reads, writes, or runs anything itself. It 
 
 Standing rules that bind this skill and every agent it starts:
 
-- **Run on this machine.** The machine is Ubuntu 26.04 x86_64 under WSL2. Run the checks directly in the delivery's worktree. Never run `install.sh` or `bootstrap.sh`: they change the machine and need an explicit request from the user. A missing check tool is reported as blocked, never installed.
+- **Run on this machine.** The machine is Ubuntu 26.04 (x86_64 or arm64) under WSL2. Run the checks directly in the delivery's worktree. Never run `install.sh` or `bootstrap.sh`: they change the machine and need an explicit request from the user. A missing check tool is reported as blocked, never installed.
 - **Name the subagents first.** No delivery job starts until the user has named the subagent (type or model) for every job kind. The orchestrator asks for missing ones once, before the setup job, and waits.
 - **Run autonomously after that.** Never ask the user anything during delivery: not about logic, tests, fixes, files, or continuing. Decide by the plan, the rules, and the project context, record each decision the plan did not make, and keep going until the close stage ends or a stop limit is reached.
 - **Write code before tests.** The code stage writes logic only. Tests come only in the test stage, after the PR is open.

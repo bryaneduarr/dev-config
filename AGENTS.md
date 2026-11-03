@@ -1,6 +1,6 @@
 # Mandatory agent instructions
 
-This repository is a personal development environment installed with bash. It targets one machine: Ubuntu 26.04 on x86_64 running under WSL2. `bootstrap.sh` prepares a fresh machine and `install.sh` installs the modules in `modules/` (Herdr, tmux, Yazi, Neovim, Pi, the `agents` command, and Bash aliases). Pi and `agents` are TypeScript, the Neovim configuration is Lua, and the installers are bash.
+This repository is a personal development environment installed with bash. It targets Ubuntu 26.04 under WSL2 on x86_64 or arm64 (aarch64); the installers detect the architecture. `bootstrap.sh` prepares a fresh machine and `install.sh` installs the modules in `modules/` (Herdr, tmux, Yazi, Neovim, Pi, the `agents` command, and Bash aliases). Pi and `agents` are TypeScript, the Neovim configuration is Lua, and the installers are bash.
 
 Before investigating, creating, changing, reviewing, or verifying anything, read these rule files completely. Resolve paths from the repository root. They impose mandatory behavior, not suggestions:
 
@@ -43,7 +43,7 @@ Skills live in `.agents/skills/<category>/<name>/SKILL.md`. Claude Code finds th
 
 - Make the smallest correct change; preserve unrelated behavior and user edits. Required relocation of related existing files is part of that change, not an unrelated refactor.
 - Prefer bash for simple glue and TypeScript for logic. No new Python.
-- Target only Ubuntu 26.04 x86_64 on WSL2. Do not add code or mentions for other distributions, architectures, or a native desktop.
+- Target only Ubuntu 26.04 on WSL2, on x86_64 and arm64. Take the architecture from `lib/common.sh`; never hard-code one. Do not add code or mentions for other distributions, architectures, or a native desktop.
 - Organize by feature under `modules/<module>/` with descriptive kebab-case names and the deepest meaningful owner. Never create `shared/`, `common/`, `utils/`, or `helpers/` folders, barrel files, or `default.nix` files.
 - Installers are idempotent and source `lib/common.sh` instead of redefining its functions.
 - Validate untrusted data at boundaries. No `any`, no unsafe casts, no suppressed type errors.

@@ -18,7 +18,7 @@ The request is a starting point, not a final spec. Find the real goal, show what
 1. Read `.agents/project-context/start-here.md` first if it exists. Open only the topic notes the goal touches.
 2. List what to **reuse**, what to **build**, and what is a **gap**, each with its owner path.
 3. If `.agents/plans/<slug>/` exists for this goal, read it and continue from its open points.
-4. Never ask what the project already answers. Treat it as an assumption. That includes the environment: Ubuntu 26.04 x86_64 under WSL2, with commands run directly on this machine.
+4. Never ask what the project already answers. Treat it as an assumption. That includes the environment: Ubuntu 26.04 (x86_64 or arm64) under WSL2, with commands run directly on this machine.
 
 ## Ask
 

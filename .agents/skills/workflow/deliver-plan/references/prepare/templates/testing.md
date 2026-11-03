@@ -1,6 +1,6 @@
 # Testing <feature>
 
-The verify job runs these in order, first in the test stage after the tests are written, then again in the final test stage on the committed tree. Every command runs directly in the delivery's worktree on this machine (Ubuntu 26.04 x86_64 under WSL2). Never run `install.sh` or `bootstrap.sh`. Run long commands detached with output in a log file and poll it. A failing command does not stop the next one unless the next one lists it under Needs. A missing check tool makes its row blocked; do not install it.
+The verify job runs these in order, first in the test stage after the tests are written, then again in the final test stage on the committed tree. Every command runs directly in the delivery's worktree on this machine (Ubuntu 26.04 (x86_64 or arm64) under WSL2). Never run `install.sh` or `bootstrap.sh`. Run long commands detached with output in a log file and poll it. A failing command does not stop the next one unless the next one lists it under Needs. A missing check tool makes its row blocked; do not install it.
 
 | Order | Check | Command | Needs |
 | --- | --- | --- | --- |
