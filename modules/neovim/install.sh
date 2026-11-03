@@ -17,6 +17,8 @@ source "$repository_dir/lib/common.sh"
 
 readonly neovim_dir="$data_dir/neovim"
 readonly lua_language_server_dir="$data_dir/lua-language-server"
+# Neovim names its archives nvim-linux-x86_64 and nvim-linux-arm64.
+readonly neovim_architecture="${release_architecture/aarch64/arm64}"
 
 install_apt_dependencies() {
   apt_install_missing \
@@ -29,13 +31,15 @@ install_apt_dependencies() {
   if ! has_command fd && has_command fdfind; then
     link_into_local_bin "$(command -v fdfind)" fd
   fi
+  # Mason ships clangd only for x86_64 Linux, so other architectures use Ubuntu's package.
+  [ "$release_architecture" = x86_64 ] || apt_install_missing clangd:clangd
 }
 
 install_neovim() {
   local work_dir
   work_dir="$(mktemp -d)"
   log "Installing Neovim into $neovim_dir"
-  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$release_architecture.tar.gz" \
+  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$neovim_architecture.tar.gz" \
     -o "$work_dir/nvim.tar.gz"
   rm -rf "$neovim_dir"
   mkdir -p "$neovim_dir"

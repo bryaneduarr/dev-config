@@ -9,9 +9,13 @@ local tools = {
   "prettierd",
   "eslint_d",
   "cpplint",
-  "clangd",
   "clang-format",
 }
+
+-- Mason ships clangd only for x86_64 Linux; modules/neovim/install.sh installs Ubuntu's clangd elsewhere.
+if vim.uv.os_uname().machine == "x86_64" then
+  table.insert(tools, "clangd")
+end
 
 return {
   "williamboman/mason.nvim",
