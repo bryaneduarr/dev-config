@@ -13,6 +13,7 @@ main() {
   run_privileged apt-get update
   run_privileged apt-get full-upgrade -y
   run_privileged apt-get autoremove -y
+  run_module bun
   log "Packages are up to date"
 }
 
