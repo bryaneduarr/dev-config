@@ -6,8 +6,6 @@ readonly local_bin_dir="$HOME/.local/bin"
 readonly required_node_major=24
 # Herdr's vendored libghostty-vt only builds with this exact Zig version.
 readonly required_zig_version=0.16.0
-readonly node_architecture=x64
-readonly release_architecture=x86_64
 readonly zig_dir="$data_dir/zig"
 
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -16,6 +14,15 @@ fail() {
   printf '\033[1;31merror:\033[0m %s\n' "$*" >&2
   exit 1
 }
+
+# Node.js and lua-language-server name the CPU x64 or arm64; Zig and Yazi use uname's x86_64 or aarch64.
+release_architecture="$(uname -m)"
+readonly release_architecture
+case "$release_architecture" in
+  x86_64) readonly node_architecture=x64 ;;
+  aarch64) readonly node_architecture=arm64 ;;
+  *) fail "unsupported CPU architecture: $release_architecture (expected x86_64 or aarch64)" ;;
+esac
 
 run_privileged() {
   if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo "$@"; fi
