@@ -44,23 +44,23 @@ const MODULAR_USER_CARD_RENDER =
   'const lines = harnessCardLines("user", width, (contentWidth) => super.render(contentWidth));';
 
 const MODULAR_REPLY = [
-  "this.contentContainer.addChild(new Markdown(content.text.trim(), this.outputPad, 0, this.markdownTheme, undefined, {",
-  '                    transform: createMarkdownTransform("assistant", this.isStreaming, this.markdownTransformers),',
-  "                }));",
+  'addVisibleChild(markdownBlock("text", text, () => new Markdown(text, this.outputPad, 0, this.markdownTheme, undefined, {',
+  '                    transform: createMarkdownTransform("assistant", () => this.isStreaming, this.markdownTransformers, this.messageId, this.timestamp),',
+  "                })));",
 ].join("\n");
 const MODULAR_REPLY_CARD = [
-  "this.contentContainer.addChild(harnessFinalReply(message, new Markdown(content.text.trim(), this.outputPad, 0, this.markdownTheme, undefined, {",
-  '                    transform: createMarkdownTransform("assistant", this.isStreaming, this.markdownTransformers),',
-  "                })));",
+  'addVisibleChild(harnessFinalReply(message, markdownBlock("text", text, () => new Markdown(text, this.outputPad, 0, this.markdownTheme, undefined, {',
+  '                    transform: createMarkdownTransform("assistant", () => this.isStreaming, this.markdownTransformers, this.messageId, this.timestamp),',
+  "                }))));",
 ].join("\n");
 
 const BUNDLED_REPLY = [
-  "this.contentContainer.addChild(new Markdown(content.text.trim(),this.outputPad,0,this.markdownTheme,void 0,",
-  '{transform:createMarkdownTransform("assistant",this.isStreaming,this.markdownTransformers)}));',
+  'addVisibleChild(markdownBlock("text",text,()=>new Markdown(text,this.outputPad,0,this.markdownTheme,void 0,',
+  '{transform:createMarkdownTransform("assistant",()=>this.isStreaming,this.markdownTransformers,this.messageId,this.timestamp)})))',
 ].join("");
 const BUNDLED_REPLY_CARD = [
-  "this.contentContainer.addChild(harnessFinalReply(message,new Markdown(content.text.trim(),this.outputPad,0,this.markdownTheme,void 0,",
-  '{transform:createMarkdownTransform("assistant",this.isStreaming,this.markdownTransformers)})));',
+  'addVisibleChild(harnessFinalReply(message,markdownBlock("text",text,()=>new Markdown(text,this.outputPad,0,this.markdownTheme,void 0,',
+  '{transform:createMarkdownTransform("assistant",()=>this.isStreaming,this.markdownTransformers,this.messageId,this.timestamp)}))))',
 ].join("");
 const BUNDLED_USER_RENDER =
   "render(width){let lines=super.render(width);return lines.length===0||(lines[0]=OSC133_ZONE_START2";

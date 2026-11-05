@@ -94,6 +94,10 @@ apply_patch() {
 
 apply_pi_patches() {
   log "Applying harness patches"
+  apply_patch pi-extension-packages/pi-tree-sitter-grammars.patch.ts "$pi_packages_dir/node_modules/pi-tree-sitter"
+  apply_patch pi-extension-packages/lsp-host-dependencies.patch.ts "$pi_packages_dir/node_modules/pi-lsp-adapter"
+  apply_patch pi-extension-packages/powerline-empty-context.patch.ts "$pi_packages_dir/node_modules/pi-powerline-footer"
+  apply_patch pi-extension-packages/powerline-input-card.patch.ts "$pi_packages_dir/node_modules/pi-powerline-footer"
   local -a coding_agent_patches=(
     pi-coding-agent/transcript-rendering/pi-hidden-assistant-spacing.patch.ts
     pi-coding-agent/turn-navigation/pi-turn-window.patch.ts
@@ -109,10 +113,6 @@ apply_pi_patches() {
   for patch_file in "${coding_agent_patches[@]}"; do
     apply_patch "$patch_file" "$pi_coding_agent_dir"
   done
-  apply_patch pi-extension-packages/pi-tree-sitter-grammars.patch.ts "$pi_packages_dir/node_modules/pi-tree-sitter"
-  apply_patch pi-extension-packages/lsp-host-dependencies.patch.ts "$pi_packages_dir/node_modules/pi-lsp-adapter"
-  apply_patch pi-extension-packages/powerline-empty-context.patch.ts "$pi_packages_dir/node_modules/pi-powerline-footer"
-  apply_patch pi-extension-packages/powerline-input-card.patch.ts "$pi_packages_dir/node_modules/pi-powerline-footer"
 }
 
 install_language_tools() {

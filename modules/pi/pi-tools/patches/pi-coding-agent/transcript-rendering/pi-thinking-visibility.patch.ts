@@ -10,10 +10,10 @@ const THINKING_STATUS = `\`Thinking blocks: \${this.hideThinkingBlock ? "hidden"
 const MODULAR_THINKING_STATUS = `        this.showStatus(${THINKING_STATUS});\n`;
 const MODULAR_REGION = "new MouseRegion(thinkingComponent,";
 const MODULAR_REGION_HIDEABLE = "new MouseRegion(harnessThinkingWhenVisible(thinkingComponent),";
-const MODULAR_SPACER =
-  "if (hasVisibleContentAfter) {\n                    this.contentContainer.addChild(new Spacer(1));";
-const MODULAR_SPACER_HIDEABLE =
-  "if (hasVisibleContentAfter) {\n                    this.contentContainer.addChild(harnessThinkingWhenVisible(new Spacer(1)));";
+const HIDEABLE_SPACER_AFTER_THINKING_CONDITION =
+  'message.content.slice(i + 1).some((content) => content.type === "text" && content.text.trim())';
+const MODULAR_SPACER = "                needsSpacer = true;\n            }\n        }\n        // Check if incomplete";
+const MODULAR_SPACER_HIDEABLE = `                if (${HIDEABLE_SPACER_AFTER_THINKING_CONDITION}) {\n                    this.contentContainer.addChild(harnessThinkingWhenVisible(new Spacer(1)));\n                }\n            }\n        }\n        // Check if incomplete`;
 const MODULAR_COMPONENT_CLASS = "export class AssistantMessageComponent extends Container {";
 const MODULAR_HELPER = `function harnessThinkingWhenVisible(component) {
     return {
@@ -24,9 +24,9 @@ const MODULAR_HELPER = `function harnessThinkingWhenVisible(component) {
 `;
 
 const BUNDLED_THINKING_STATUS = `,this.showStatus(\`Thinking blocks: \${this.hideThinkingBlock?"hidden":"visible"}\`)`;
-const BUNDLED_SPACER = "hasVisibleContentAfter&&this.contentContainer.addChild(new Spacer(1))";
+const BUNDLED_SPACER = ",needsSpacer=!0}}let hasToolCalls";
 const BUNDLED_SPACER_HIDEABLE =
-  "hasVisibleContentAfter&&this.contentContainer.addChild(harnessThinkingWhenVisible(new Spacer(1)))";
+  ',message.content.slice(i+1).some(content=>content.type==="text"&&content.text.trim())&&this.contentContainer.addChild(harnessThinkingWhenVisible(new Spacer(1)))}}let hasToolCalls';
 const BUNDLED_COMPONENT_DECLARATION = 'var OSC133_ZONE_START="\\x1B]133;A\\x07"';
 const BUNDLED_HELPER = [
   "function harnessThinkingWhenVisible(component){",
