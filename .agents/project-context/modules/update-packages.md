@@ -11,3 +11,8 @@
 - [agent-browser](../../../modules/agent-browser/install.sh): `agent-browser@latest` via `install_global_npm_tools` into the tools dir, linked into `~/.local/bin`, then `agent-browser install` downloads Chrome. Registered last in `all_modules`.
 - User decided: tracks latest, matching Bun. Re-running the installer upgrades it.
 - Checked: installer run (0.41.2, Chrome 157), `agent-browser open` worked, check-code passed on the module and install.sh. Not run: `--with-deps` (system libraries were enough).
+
+# ffmpeg
+- Stamp: 2026-11-04 UTC; modules/ffmpeg uncommitted.
+- [ffmpeg](../../../modules/ffmpeg/install.sh): `apt_install_missing ffmpeg:ffmpeg`; Ubuntu 26.04 candidate is 8.0.1. `update-packages` upgrades it through apt full-upgrade. Registered last in `all_modules`.
+- Checked: check-code passed. Install not completed in-session: sudo needs a terminal password.
