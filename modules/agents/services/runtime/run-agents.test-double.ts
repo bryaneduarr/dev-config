@@ -11,7 +11,7 @@ export const okUsage: ProviderUsage = {
   status: "ok",
   provider: "claude",
   plan: { state: "unreported" },
-  windows: [{ label: "Weekly", percentRemaining: 80, resetsAt: "2026-10-28T16:12:00Z" }],
+  windows: [{ label: "Weekly", percentRemaining: 80, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } }],
 };
 
 export const failedUsage: ProviderUsage = {

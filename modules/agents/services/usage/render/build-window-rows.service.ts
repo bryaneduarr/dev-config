@@ -4,9 +4,9 @@ import {
   PERCENT_FIELD_WIDTH,
   SPACE,
 } from "../../../constants/render/card-layout.constant.ts";
-import { RESET_TIME_UNKNOWN_TEXT } from "../../../constants/render/card-text.constant.ts";
+import { RESET_TIME_UNKNOWN_TEXT, WINDOW_NOT_STARTED_TEXT } from "../../../constants/render/card-text.constant.ts";
 import type { CardRenderOptions } from "../../../types/render/card-render-options.interface.ts";
-import type { UsageWindow } from "../../../types/usage/provider-usage.interface.ts";
+import type { UsageWindow, WindowReset } from "../../../types/usage/provider-usage.interface.ts";
 import { formatResetCountdown } from "../countdown/format-reset-countdown.service.ts";
 import { buildUsageBar } from "./build-usage-bar.service.ts";
 import { measureVisibleLength } from "./measure-visible-length.service.ts";
@@ -14,8 +14,9 @@ import { padVisibleText } from "./pad-visible-text.service.ts";
 import { sanitizeCardText } from "./sanitize-card-text.service.ts";
 import { truncateText } from "./truncate-text.service.ts";
 
-function describeResetTime(resetsAt: string, now: Date): string {
-  const countdown = formatResetCountdown({ resetsAt, now });
+function describeResetTime(reset: WindowReset, now: Date): string {
+  if (reset.state === "not-started") return WINDOW_NOT_STARTED_TEXT;
+  const countdown = formatResetCountdown({ resetsAt: reset.resetsAt, now });
   return countdown.state === "formatted" ? countdown.text : RESET_TIME_UNKNOWN_TEXT;
 }
 
@@ -25,7 +26,7 @@ function buildWindowLines(usageWindow: UsageWindow, labelWidth: number, options:
   const bar = buildUsageBar({ percent, colorEnabled: options.colorEnabled });
   const percentText = `${percent}%`.padStart(PERCENT_FIELD_WIDTH);
   const barRow = `${label}${COLUMN_GAP}${bar}${COLUMN_GAP}${percentText}`;
-  const countdown = describeResetTime(usageWindow.resetsAt, options.now);
+  const countdown = describeResetTime(usageWindow.reset, options.now);
   const countdownRow = `${barRow}${COLUMN_GAP}${countdown}`;
   const fitsOnOneLine = measureVisibleLength(countdownRow) <= options.innerWidth;
   const indentedCountdown = `${SPACE.repeat(labelWidth + COLUMN_GAP.length)}${countdown}`;

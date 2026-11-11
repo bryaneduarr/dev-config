@@ -9,3 +9,4 @@ export const MESSAGE_STATUS_WORDS: Readonly<Record<MessageUsageStatus, string>> 
 export const NO_LIMITS_REPORTED_TEXT = "no limits reported";
 
 export const RESET_TIME_UNKNOWN_TEXT = "reset time unknown";
+export const WINDOW_NOT_STARTED_TEXT = "not started";

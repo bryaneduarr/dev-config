@@ -33,9 +33,9 @@ describe("fetchOpenCodeUsage with a saved key", () => {
       provider: "opencode",
       plan: { state: "unreported" },
       windows: [
-        { label: "5-hour", percentRemaining: 100, resetsAt: "2026-10-26T20:36:20.000Z" },
-        { label: "Weekly", percentRemaining: 100, resetsAt: "2026-11-02T00:00:00.000Z" },
-        { label: "Monthly", percentRemaining: 95, resetsAt: "2026-11-21T15:22:05.000Z" },
+        { label: "5-hour", percentRemaining: 100, reset: { state: "scheduled", resetsAt: "2026-10-26T20:36:20.000Z" } },
+        { label: "Weekly", percentRemaining: 100, reset: { state: "scheduled", resetsAt: "2026-11-02T00:00:00.000Z" } },
+        { label: "Monthly", percentRemaining: 95, reset: { state: "scheduled", resetsAt: "2026-11-21T15:22:05.000Z" } },
       ],
     });
   });
@@ -48,7 +48,9 @@ describe("fetchOpenCodeUsage with a saved key", () => {
 
     expect(await fetchOpenCodeUsage(createOpenCodeEnvironment(homeDirectory, fake.fetchUrl))).toMatchObject({
       status: "ok",
-      windows: [{ label: "daily", percentRemaining: 90, resetsAt: "2026-10-27T00:00:00.000Z" }],
+      windows: [
+        { label: "daily", percentRemaining: 90, reset: { state: "scheduled", resetsAt: "2026-10-27T00:00:00.000Z" } },
+      ],
     });
   });
 

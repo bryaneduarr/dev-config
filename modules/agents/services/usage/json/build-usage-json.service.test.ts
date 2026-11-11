@@ -9,7 +9,13 @@ describe("buildUsageJson", () => {
         status: "ok",
         provider: "claude",
         plan: { state: "reported", name: "max" },
-        windows: [{ label: "5-hour", percentRemaining: 97, resetsAt: "2026-10-25T16:00:00.000Z" }],
+        windows: [
+          {
+            label: "5-hour",
+            percentRemaining: 97,
+            reset: { state: "scheduled", resetsAt: "2026-10-25T16:00:00.000Z" },
+          },
+        ],
       },
       { status: "login-expired", provider: "claude", message: "Example sign-in message." },
       { status: "error", provider: "opencode", message: "Example failure message." },

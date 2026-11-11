@@ -21,14 +21,22 @@ const hostileLabelUsage: ProviderUsage = {
   status: "ok",
   provider: "claude",
   plan: { state: "unreported" },
-  windows: [{ label: "Ses\u001b[2J\rsion🙂", percentRemaining: 97, resetsAt: "2026-10-28T16:12:00Z" }],
+  windows: [
+    {
+      label: "Ses\u001b[2J\rsion🙂",
+      percentRemaining: 97,
+      reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" },
+    },
+  ],
 };
 
 const hostilePlanUsage: ProviderUsage = {
   status: "ok",
   provider: "claude",
   plan: { state: "reported", name: "ma\u001b[31mx\r" },
-  windows: [{ label: "Monthly", percentRemaining: 80, resetsAt: "2026-10-28T16:12:00Z" }],
+  windows: [
+    { label: "Monthly", percentRemaining: 80, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } },
+  ],
 };
 
 const blankPlanUsage: ProviderUsage = {

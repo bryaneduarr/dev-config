@@ -16,9 +16,9 @@ export const claudeUsage: ProviderUsage = {
   provider: "claude",
   plan: { state: "reported", name: "max" },
   windows: [
-    { label: "Session", percentRemaining: 97, resetsAt: "2026-10-25T16:12:00Z" },
-    { label: "Weekly", percentRemaining: 50, resetsAt: "2026-10-28T16:12:00Z" },
-    { label: "Opus weekly", percentRemaining: 0, resetsAt: "2026-10-26T11:59:00Z" },
+    { label: "Session", percentRemaining: 97, reset: { state: "scheduled", resetsAt: "2026-10-25T16:12:00Z" } },
+    { label: "Weekly", percentRemaining: 50, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } },
+    { label: "Opus weekly", percentRemaining: 0, reset: { state: "scheduled", resetsAt: "2026-10-26T11:59:00Z" } },
   ],
 };
 
@@ -26,7 +26,7 @@ export const unplannedClaudeUsage: ProviderUsage = {
   status: "ok",
   provider: "claude",
   plan: { state: "unreported" },
-  windows: [{ label: "Weekly", percentRemaining: 80, resetsAt: "2026-10-28T16:12:00Z" }],
+  windows: [{ label: "Weekly", percentRemaining: 80, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } }],
 };
 
 export const notSignedInUsage: ProviderUsage = {
@@ -58,7 +58,7 @@ export const resetUnknownUsage: ProviderUsage = {
   status: "ok",
   provider: "opencode",
   plan: { state: "unreported" },
-  windows: [{ label: "Rolling", percentRemaining: 100, resetsAt: "not-a-date" }],
+  windows: [{ label: "Rolling", percentRemaining: 100, reset: { state: "scheduled", resetsAt: "not-a-date" } }],
 };
 
 export function renderPlain(usages: readonly ProviderUsage[], width = wideWidth): string {

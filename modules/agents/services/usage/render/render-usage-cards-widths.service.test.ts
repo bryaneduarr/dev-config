@@ -23,7 +23,9 @@ const narrowClaudeUsage: ProviderUsage = {
   status: "ok",
   provider: "claude",
   plan: { state: "reported", name: "max" },
-  windows: [{ label: "Opus weekly", percentRemaining: 97, resetsAt: "2026-10-28T16:12:00Z" }],
+  windows: [
+    { label: "Opus weekly", percentRemaining: 97, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } },
+  ],
 };
 
 const longMessageUsage: ProviderUsage = {

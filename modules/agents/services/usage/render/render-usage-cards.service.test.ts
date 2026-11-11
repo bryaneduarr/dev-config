@@ -23,7 +23,7 @@ function singleWindowUsage(percentRemaining: number): ProviderUsage {
     status: "ok",
     provider: "claude",
     plan: { state: "unreported" },
-    windows: [{ label: "Monthly", percentRemaining, resetsAt: "2026-10-28T16:12:00Z" }],
+    windows: [{ label: "Monthly", percentRemaining, reset: { state: "scheduled", resetsAt: "2026-10-28T16:12:00Z" } }],
   };
 }
 
@@ -71,6 +71,17 @@ describe("renderUsageCards", () => {
   test("shows reset time unknown when the reset timestamp is invalid", () => {
     const rollingRow = `Rolling  ${filledCell.repeat(20)}  100%  reset time unknown`;
     expect(renderPlain([resetUnknownUsage])).toBe(boxCard(["OpenCode Go", "", rollingRow], wideInnerWidth));
+  });
+
+  test("shows not started for a window that has no reset yet", () => {
+    const notStartedUsage: ProviderUsage = {
+      status: "ok",
+      provider: "claude",
+      plan: { state: "unreported" },
+      windows: [{ label: "5-hour", percentRemaining: 100, reset: { state: "not-started" } }],
+    };
+    const sessionRow = `5-hour  ${filledCell.repeat(20)}  100%  not started`;
+    expect(renderPlain([notStartedUsage])).toBe(boxCard(["Claude Code", "", sessionRow], wideInnerWidth));
   });
 
   test("separates cards with one blank line", () => {

@@ -21,6 +21,6 @@ export function buildOpenCodeUsageWindows(usage: OpenCodeUsageResponse["usage"])
   return Object.entries(usage).map(([windowName, window]) => ({
     label: describeWindowLabel(windowName),
     percentRemaining: convertUsedToRemainingPercent(window.percent),
-    resetsAt: new Date(window.resetsAt).toISOString(),
+    reset: { state: "scheduled", resetsAt: new Date(window.resetsAt).toISOString() },
   }));
 }

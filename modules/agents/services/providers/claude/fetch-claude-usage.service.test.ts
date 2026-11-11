@@ -33,9 +33,13 @@ describe("fetchClaudeUsage with a usable login", () => {
       provider: "claude",
       plan: { state: "reported", name: "max" },
       windows: [
-        { label: "5-hour", percentRemaining: 97, resetsAt: "2026-10-25T16:00:00.000Z" },
-        { label: "Weekly", percentRemaining: 96, resetsAt: "2026-11-01T00:00:00.000Z" },
-        { label: "Weekly Fable", percentRemaining: 100, resetsAt: "2026-11-01T00:00:00.000Z" },
+        { label: "5-hour", percentRemaining: 97, reset: { state: "scheduled", resetsAt: "2026-10-25T16:00:00.000Z" } },
+        { label: "Weekly", percentRemaining: 96, reset: { state: "scheduled", resetsAt: "2026-11-01T00:00:00.000Z" } },
+        {
+          label: "Weekly Fable",
+          percentRemaining: 100,
+          reset: { state: "scheduled", resetsAt: "2026-11-01T00:00:00.000Z" },
+        },
       ],
     });
   });
@@ -57,6 +61,17 @@ describe("fetchClaudeUsage with a usable login", () => {
         },
       },
     ]);
+  });
+
+  test("reports a limit without a reset time as not started", async () => {
+    await writeClaudeCredentials(homeDirectory, claudeCredentialsText());
+    const [sessionLimit] = claudeUsageBody.limits;
+    const fake = createFakeFetch(200, { limits: [{ ...sessionLimit, percent: 0, resets_at: null }] });
+
+    expect(await fetchClaudeUsage(createClaudeEnvironment(homeDirectory, fake.fetchUrl))).toMatchObject({
+      status: "ok",
+      windows: [{ label: "5-hour", percentRemaining: 100, reset: { state: "not-started" } }],
+    });
   });
 
   test("reports no plan when the subscription type is blank", async () => {

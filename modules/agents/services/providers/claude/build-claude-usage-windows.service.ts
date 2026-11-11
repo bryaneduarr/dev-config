@@ -6,7 +6,7 @@ import {
   CLAUDE_WEEKLY_SCOPED_KIND,
 } from "../../../constants/providers/claude/claude-provider.constant.ts";
 import type { ClaudeUsageLimit } from "../../../types/providers/claude/claude-usage-response.interface.ts";
-import type { UsageWindow } from "../../../types/usage/provider-usage.interface.ts";
+import type { UsageWindow, WindowReset } from "../../../types/usage/provider-usage.interface.ts";
 import { convertUsedToRemainingPercent } from "../../usage/remaining-percent/convert-used-to-remaining-percent.service.ts";
 
 function describeLimitLabel(limit: ClaudeUsageLimit): string {
@@ -18,10 +18,15 @@ function describeLimitLabel(limit: ClaudeUsageLimit): string {
   return limit.kind;
 }
 
+function toWindowReset(limit: ClaudeUsageLimit): WindowReset {
+  if (limit.resets_at.state === "not-started") return limit.resets_at;
+  return { state: "scheduled", resetsAt: new Date(limit.resets_at.resetsAt).toISOString() };
+}
+
 export function buildClaudeUsageWindows(limits: readonly ClaudeUsageLimit[]): readonly UsageWindow[] {
   return limits.map((limit) => ({
     label: describeLimitLabel(limit),
     percentRemaining: convertUsedToRemainingPercent(limit.percent),
-    resetsAt: new Date(limit.resets_at).toISOString(),
+    reset: toWindowReset(limit),
   }));
 }

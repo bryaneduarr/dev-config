@@ -8,6 +8,9 @@ export type ProviderId = (typeof PROVIDER_ORDER)[number];
 /** One limit window reported by a provider, with validated fields. */
 export type UsageWindow = Readonly<z.output<typeof usageWindowSchema>>;
 
+/** When a limit window resets, or that it has not started. */
+export type WindowReset = UsageWindow["reset"];
+
 /** Plan the provider reports for the signed-in account. */
 export type PlanReport =
   | {

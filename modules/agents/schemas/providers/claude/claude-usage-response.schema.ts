@@ -16,13 +16,21 @@ const claudeLimitScopeSchema = z
     return { state: "model" as const, modelName: scope.model.display_name };
   });
 
+const claudeLimitResetSchema = z.iso
+  .datetime({ offset: true })
+  .nullable()
+  .transform((resetsAt) => {
+    if (resetsAt === null) return { state: "not-started" as const };
+    return { state: "scheduled" as const, resetsAt };
+  });
+
 export const claudeUsageLimitSchema = z.object({
   /** Limit category the provider reports, such as `session`, `weekly_all`, or `weekly_scoped`. */
   kind: z.string(),
   /** Share of the limit already used, as the provider reports it. */
   percent: z.number(),
-  /** Moment the limit resets, as an ISO 8601 datetime with a UTC offset. */
-  resets_at: z.iso.datetime({ offset: true }),
+  /** Moment the limit resets as an ISO 8601 datetime with a UTC offset, or not started when the provider reports none. */
+  resets_at: claudeLimitResetSchema,
   /** Model scope of the limit, or unscoped when the provider reports none. */
   scope: claudeLimitScopeSchema,
 });

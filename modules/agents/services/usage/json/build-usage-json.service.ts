@@ -12,7 +12,11 @@ function toUsageJsonItem(usage: ProviderUsage) {
         provider: usage.provider,
         status: usage.status,
         plan: usage.plan.state === "reported" ? usage.plan.name : null,
-        windows: usage.windows.map(({ label, percentRemaining, resetsAt }) => ({ label, percentRemaining, resetsAt })),
+        windows: usage.windows.map(({ label, percentRemaining, reset }) => ({
+          label,
+          percentRemaining,
+          resetsAt: reset.state === "scheduled" ? reset.resetsAt : null,
+        })),
         message: null,
       };
     case "not-signed-in":
