@@ -16,3 +16,9 @@
 - Stamp: 2026-11-04 UTC; modules/ffmpeg uncommitted.
 - [ffmpeg](../../../modules/ffmpeg/install.sh): `apt_install_missing ffmpeg:ffmpeg`; Ubuntu 26.04 candidate is 8.0.1. `update-packages` upgrades it through apt full-upgrade. Registered last in `all_modules`.
 - Checked: check-code passed. Install not completed in-session: sudo needs a terminal password.
+
+# uv
+- Stamp: 2026-11-05 UTC; modules/uv uncommitted.
+- [uv](../../../modules/uv/install.sh): latest GitHub release (tag from releases/latest redirect, no `v` prefix), `.sha256`-verified, in data dir `uv/`; links uv and uvx. Skips when installed version matches. Not run by `update-packages`.
+- User decided: yt-dlp stays installed on the machine but is not managed by this repository.
+- Checked: check-code passed; uv installer run twice (0.13.7, second run skipped).

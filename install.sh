@@ -3,7 +3,7 @@ set -euo pipefail
 
 repository_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly repository_dir
-readonly -a all_modules=(rust android herdr tmux yazi neovim pi agents bash bun rule-audit check-code update-packages agent-browser ffmpeg tailscale)
+readonly -a all_modules=(rust android herdr tmux yazi neovim pi agents bash bun rule-audit check-code update-packages agent-browser ffmpeg tailscale uv)
 # Google publishes the Linux Android emulator, NDK, and platform-tools for x86_64 hosts only.
 readonly -a x86_64_only_modules=(android)
 
