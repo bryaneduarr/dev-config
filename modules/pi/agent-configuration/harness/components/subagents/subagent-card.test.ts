@@ -6,7 +6,7 @@ import { renderPlainCard, renderPlainCardAgain, resetCardStores, TEST_CWD } from
 
 beforeEach(resetCardStores);
 
-test("the card shows only the active tool, its target, and its state", () => {
+test("the card shows each tool, its target, its state and time, but never the mission", () => {
   const startedAt = Date.now();
   activityStore.begin({
     id: "call-1",
@@ -48,14 +48,11 @@ test("the card shows only the active tool, its target, and its state", () => {
 
   expect(lines).toContain("+-- / SUBAGENT ");
   expect(lines).toMatch(/\| Inspect parser\s+\|/);
-  expect(lines).toContain("BASH pwd");
-  expect(lines).toContain("Running...");
-  expect(lines).not.toContain("READ");
-  expect(lines).toMatch(/Time: 0\.[0-9] s/);
-  expect(lines).not.toContain("2.0 s");
+  expect(lines).toContain("READ parser.ts");
+  expect(lines).toMatch(/Running 0\.\d{3}s {2}BASH pwd/);
+  expect(lines).toContain("Working...");
+  expect(lines).toMatch(/Time: 2\.\d{3}s/);
   expect(lines).not.toContain("·");
-  expect(lines).not.toContain("sample");
-  expect(lines).not.toContain("parser.ts");
   expect(lines).not.toContain("Secret long mission");
 });
 

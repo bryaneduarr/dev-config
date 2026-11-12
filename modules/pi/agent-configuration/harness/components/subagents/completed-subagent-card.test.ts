@@ -5,7 +5,7 @@ import { renderPlainCard, resetCardStores, TEST_CWD } from "./subagent-card.test
 
 beforeEach(resetCardStores);
 
-test("a completed card shows the last tool's duration without earlier calls or total time", () => {
+test("a completed card lists each tool with its duration and the total time", () => {
   activityStore.begin({
     id: "done-call",
     toolName: "task",
@@ -48,12 +48,11 @@ test("a completed card shows the last tool's duration without earlier calls or t
   expect(lines).toContain("+-- SUBAGENT ");
   expect(lines).not.toContain("+-- / SUBAGENT ");
   expect(lines).toContain("Locate pi harness");
-  expect(lines).toContain("GREP");
-  expect(lines).toContain("Done");
-  expect(lines).toContain("Time: 1.2 s");
-  expect(lines).not.toContain("BASH");
+  expect(lines).toContain("Done 0.100s  BASH pwd");
+  expect(lines).toContain("Done 1.200s  GREP");
   expect(lines).toContain("Completed");
-  expect(lines).not.toContain("34.4 s");
+  expect(lines).toContain("Time: 34.400s");
+  expect(lines).not.toContain("Working...");
   expect(lines).not.toContain("Model");
   expect(lines).not.toContain("Task:");
 });

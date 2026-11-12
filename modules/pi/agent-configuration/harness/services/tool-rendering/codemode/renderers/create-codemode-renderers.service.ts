@@ -31,7 +31,7 @@ export function createCodemodeRenderers(): ToolRenderers {
         lines: presentationLines(presentation, theme),
         toolCall: { state: "present", value: context.toolCallId },
         color: THEME_ACCENT,
-        elapsedStartedAt: { state: "absent" },
+        liveFrame: { state: "absent" },
       });
       return box;
     },
@@ -52,7 +52,7 @@ export function createCodemodeRenderers(): ToolRenderers {
         lines,
         toolCall: { state: "present", value: context.toolCallId },
         color: THEME_ACCENT,
-        elapsedStartedAt: { state: "absent" },
+        liveFrame: { state: "absent" },
       });
       return box;
     },

@@ -39,7 +39,7 @@ export function registerTaskTool(pi: ExtensionAPI): void {
         theme,
         toolCallId: context.toolCallId,
         title: args.title,
-        progressLookup: { found: false },
+        readProgress: () => ({ found: false }),
         lastComponent: toValueState(context.lastComponent),
       });
     },
@@ -48,7 +48,7 @@ export function registerTaskTool(pi: ExtensionAPI): void {
         theme,
         toolCallId: context.toolCallId,
         title: context.args.title,
-        progressLookup: resolveLiveTaskProgress(subagentRegistry, readTaskProgress(toolResult.details)),
+        readProgress: () => resolveLiveTaskProgress(subagentRegistry, readTaskProgress(toolResult.details)),
         lastComponent: toValueState(context.lastComponent),
       });
     },

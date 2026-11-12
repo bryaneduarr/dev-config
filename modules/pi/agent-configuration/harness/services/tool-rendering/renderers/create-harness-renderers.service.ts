@@ -33,7 +33,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
         lines: presentationLines(runningPresentation(tool, args), theme),
         toolCall: { state: "present", value: context.toolCallId },
         color: TOOL_COLORS[tool],
-        elapsedStartedAt: { state: "absent" },
+        liveFrame: { state: "absent" },
       });
       return box;
     },
@@ -55,7 +55,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
         lines,
         toolCall: { state: "present", value: context.toolCallId },
         color: TOOL_COLORS[tool],
-        elapsedStartedAt: { state: "absent" },
+        liveFrame: { state: "absent" },
       });
       return box;
     },

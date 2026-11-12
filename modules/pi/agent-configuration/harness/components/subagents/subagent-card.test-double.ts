@@ -23,7 +23,7 @@ function renderCard(toolCallId: string, title: string, lastComponent: ValueState
     theme: plainSubagentCardTheme,
     toolCallId,
     title,
-    progressLookup: { found: false },
+    readProgress: () => ({ found: false }),
     lastComponent,
   });
 }

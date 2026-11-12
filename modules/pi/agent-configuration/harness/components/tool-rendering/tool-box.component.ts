@@ -11,6 +11,7 @@ import type { ToolActivityLookup } from "../../types/activity/store/tool-activit
 import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
 import type { ToolBoxCache } from "../../types/tool-rendering/box/tool-box-cache.interface.ts";
 import type { ToolBoxContent } from "../../types/tool-rendering/box/tool-box-content.interface.ts";
+import type { ToolBoxFrame } from "../../types/tool-rendering/box/tool-box-frame.interface.ts";
 
 export class ToolBox implements Component {
   private content: ToolBoxContent;
@@ -28,7 +29,7 @@ export class ToolBox implements Component {
       lines,
       toolCall: { state: "absent" },
       color,
-      elapsedStartedAt: { state: "absent" },
+      liveFrame: { state: "absent" },
     };
   }
 
@@ -52,15 +53,21 @@ export class ToolBox implements Component {
   render(width: number): string[] {
     if (!activityVisibility.isVisible()) return [];
 
+    const liveFrame = this.content.liveFrame;
+    if (liveFrame.state === "present") return this.renderFrame(width, liveFrame.value());
+
     const lookup = readToolActivity(this.content.toolCall);
     const isRunning = lookup.found && lookup.entry.status === "running";
     if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return [...this.cache.lines];
 
-    const rendered = boxLines(width, this.content.title, this.linesWithElapsed(lookup, isRunning)).map((line) =>
-      this.theme.fg(this.content.color, line),
-    );
+    const frame = { ...this.content, lines: this.linesWithElapsed(lookup, isRunning) };
+    const rendered = this.renderFrame(width, frame);
     this.cache = { state: "rendered", width, lines: rendered };
     return rendered;
+  }
+
+  private renderFrame(width: number, frame: ToolBoxFrame): string[] {
+    return boxLines(width, frame.title, frame.lines).map((line) => this.theme.fg(frame.color, line));
   }
 
   private linesWithElapsed(lookup: ToolActivityLookup, isRunning: boolean): readonly string[] {
@@ -76,7 +83,6 @@ export class ToolBox implements Component {
   }
 
   private timerStart(lookup: ToolActivityLookup, isRunning: boolean): ValueState<number> {
-    if (this.content.elapsedStartedAt.state === "present") return this.content.elapsedStartedAt;
     const isTimedRun = isRunning && this.showElapsed && lookup.found;
     return isTimedRun ? { state: "present", value: lookup.entry.startedAt } : { state: "absent" };
   }

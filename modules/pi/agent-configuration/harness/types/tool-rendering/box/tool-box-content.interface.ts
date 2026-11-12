@@ -1,5 +1,6 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { ValueState } from "../../activity/value/value-state.interface.ts";
+import type { ToolBoxFrame } from "./tool-box-frame.interface.ts";
 
 /** Content shown by a tool box; setting it replaces the previous content. */
 export interface ToolBoxContent {
@@ -11,6 +12,6 @@ export interface ToolBoxContent {
   readonly toolCall: ValueState<string>;
   /** Color of the border and text. */
   readonly color: ThemeColor;
-  /** Start time of a timer shown in the box, when the box has one. */
-  readonly elapsedStartedAt: ValueState<number>;
+  /** Reads the current frame on every render, for a box whose content changes without a new tool update. */
+  readonly liveFrame: ValueState<() => ToolBoxFrame>;
 }

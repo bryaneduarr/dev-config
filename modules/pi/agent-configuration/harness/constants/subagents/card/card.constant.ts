@@ -5,3 +5,6 @@ export const CARD_DONE_LABEL = "Done";
 export const CARD_CANCELLED_LABEL = "Cancelled";
 export const CARD_TIME_LABEL = "Time:";
 export const CARD_BOX_TITLE = "SUBAGENT";
+export const CARD_WORKING_LABEL = "Working...";
+export const CARD_CALL_RUNNING_LABEL = "Running";
+export const CARD_VISIBLE_CALLS = 6;
