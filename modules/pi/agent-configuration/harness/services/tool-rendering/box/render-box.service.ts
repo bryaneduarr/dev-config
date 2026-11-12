@@ -1,4 +1,5 @@
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import { ELLIPSIS } from "../../../constants/text/ellipsis.constant.ts";
 import {
   BOX_CORNER,
   BOX_HORIZONTAL_RULE,
@@ -23,7 +24,7 @@ export function renderBox(title: string, lines: readonly string[], width: number
 
   const rendered = [`${prefix}${BOX_HORIZONTAL_RULE.repeat(titleDashes)}${BOX_CORNER}`];
   for (const line of lines) {
-    rendered.push(`${BOX_VERTICAL_RULE} ${truncateToWidth(line, inner, "", true)} ${BOX_VERTICAL_RULE}`);
+    rendered.push(`${BOX_VERTICAL_RULE} ${truncateToWidth(line, inner, ELLIPSIS, true)} ${BOX_VERTICAL_RULE}`);
   }
   rendered.push(`${BOX_CORNER}${BOX_HORIZONTAL_RULE.repeat(bottomDashes)}${BOX_CORNER}`);
   return rendered;
