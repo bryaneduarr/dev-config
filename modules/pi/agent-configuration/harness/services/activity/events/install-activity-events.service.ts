@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
   ACTIVITY_COMPLETION_ENTRY,
   ACTIVITY_SUMMARY_ENTRY,
@@ -7,11 +7,13 @@ import { VISIBILITY_SHORTCUT } from "../../../constants/activity/visibility/visi
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { activitySummaryState } from "../../../stores/activity/activity-summary-state.store.ts";
 import { activityVisibility } from "../../../stores/activity/activity-visibility.store.ts";
+import { subagentRegistry } from "../../../stores/subagents/subagent-registry.store.ts";
 import { hydrateFromSession } from "../hydrate/hydrate-from-session.service.ts";
 import { restoreCompletions } from "../hydrate/restore-completions.service.ts";
 import { countMessageEntries } from "../messages/count-message-entries.service.ts";
 import { createActivityPublisher } from "./create-activity-publisher.service.ts";
 import { createAssistantMessageRecorder } from "./create-assistant-message-recorder.service.ts";
+import { createSubagentSettleWatcher } from "./create-subagent-settle-watcher.service.ts";
 import { installActivityInspectorEvents } from "./install-activity-inspector-events.service.ts";
 import { installAssistantMessageEvents } from "./install-assistant-message-events.service.ts";
 import { installToolActivityEvents } from "./install-tool-activity-events.service.ts";
@@ -19,6 +21,7 @@ import { installToolActivityEvents } from "./install-tool-activity-events.servic
 export function installActivityEvents(pi: ExtensionAPI): void {
   const publisher = createActivityPublisher();
   const assistantRecorder = createAssistantMessageRecorder();
+  const settleWatcher = createSubagentSettleWatcher(subagentRegistry);
 
   // Older sessions stored a summary in the transcript. Its live replacement
   // is an editor widget, so keep these entries invisible on reload.
@@ -28,6 +31,7 @@ export function installActivityEvents(pi: ExtensionAPI): void {
   installActivityInspectorEvents(pi, publisher.touch);
 
   pi.on("session_start", (_event, ctx) => {
+    settleWatcher.release();
     activityVisibility.reset();
     if (ctx.mode === "tui") ctx.ui.setHiddenThinkingLabel("");
     assistantRecorder.reset();
@@ -39,6 +43,7 @@ export function installActivityEvents(pi: ExtensionAPI): void {
   });
 
   pi.on("agent_start", (_event, ctx) => {
+    settleWatcher.release();
     activityVisibility.setAgentWorking(true);
     publisher.setWorking(true);
     publisher.touch(ctx);
@@ -47,7 +52,7 @@ export function installActivityEvents(pi: ExtensionAPI): void {
     activityStore.setAssistantText({ thinking: "", thinkingRedacted: false, response: "", updatedAt: Date.now() });
   });
 
-  pi.on("agent_settled", (_event, ctx) => {
+  const settle = (ctx: ExtensionContext): void => {
     publisher.touch(ctx);
     activityVisibility.setAgentWorking(false);
     publisher.stopWork();
@@ -59,6 +64,12 @@ export function installActivityEvents(pi: ExtensionAPI): void {
     }
     activityStore.setPhase("idle");
     publisher.publish(ctx);
+  };
+
+  pi.on("agent_settled", (_event, ctx) => {
+    publisher.touch(ctx);
+    if (settleWatcher.hasWorkingSubagents()) settleWatcher.holdUntilSettled(ctx, () => settle(ctx));
+    else settle(ctx);
   });
 
   pi.registerShortcut(VISIBILITY_SHORTCUT, {
@@ -70,6 +81,7 @@ export function installActivityEvents(pi: ExtensionAPI): void {
   });
 
   pi.on("session_shutdown", (_event, ctx) => {
+    settleWatcher.release();
     publisher.close(ctx);
     activityVisibility.reset();
   });
