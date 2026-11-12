@@ -177,4 +177,7 @@ main() {
   log "Pi installed. Run: pi"
 }
 
-main "$@"
+# scripts/update-pi.sh sources this file to reuse the install steps without running them all.
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi
