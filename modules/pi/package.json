@@ -5,13 +5,13 @@
     "check": "tsc --noEmit && biome ci . && knip && bun test"
   },
   "dependencies": {
-    "@earendil-works/pi-agent-core": "1.4.0",
-    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-agent-core": "1.5.2",
+    "@earendil-works/pi-ai": "1.5.2",
     "@earendil-works/pi-client": "1.1.0",
-    "@earendil-works/pi-coding-agent": "1.5.0",
+    "@earendil-works/pi-coding-agent": "1.5.2",
     "@earendil-works/pi-protocol": "1.1.0",
-    "@earendil-works/pi-telemetry": "1.4.0",
-    "@earendil-works/pi-tui": "1.4.0",
+    "@earendil-works/pi-telemetry": "1.5.2",
+    "@earendil-works/pi-tui": "1.5.2",
     "@ff-labs/pi-fff": "0.11.0",
     "@juvio15/pi-ast-grep": "0.4.2",
     "knip": "6.43.0",
