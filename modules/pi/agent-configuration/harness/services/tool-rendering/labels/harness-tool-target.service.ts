@@ -37,7 +37,7 @@ export function harnessToolTarget(tool: HarnessTool, args: Record<string, unknow
       return to ? `${from} -> ${to}` : oneLine(from);
     }
     case RUN_TOOL_NAME:
-      return runTarget(stringArg(args, "command"), stringArg(args, "cwd"));
+      return runTarget(stringArg(args, "command") || stringArg(args, "run"), stringArg(args, "cwd"));
     default:
       return tool satisfies never;
   }
