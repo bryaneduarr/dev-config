@@ -1,7 +1,3 @@
-/** Width of the zero-padded minutes and seconds of a long duration. */
-export const DURATION_PART_WIDTH = 2;
-/** Durations below this many milliseconds keep one decimal place in seconds. */
-export const DECIMAL_SECONDS_LIMIT_MS = 10_000;
 /** Tokens in one thousand, shown as kilo tokens. */
 export const TOKENS_PER_THOUSAND = 1000;
 /** Tokens in one million, shown as mega tokens. */

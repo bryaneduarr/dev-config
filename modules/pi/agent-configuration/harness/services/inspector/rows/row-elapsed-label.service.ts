@@ -1,6 +1,6 @@
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
+import { formatDuration } from "../../time/format-duration.service.ts";
 import { readEndedAt } from "../entries/read-ended-at.service.ts";
-import { formatDuration } from "../format/format-duration.service.ts";
 
 export function rowElapsedLabel(row: InspectorRow): string {
   const startedAt = row.level === "sub" ? row.sub.startedAt : row.entry.startedAt;

@@ -6,3 +6,5 @@ export const SECONDS_PER_MINUTE = 60;
 export const SECONDS_PER_HOUR = 3600;
 /** Milliseconds in one day. */
 export const MILLISECONDS_PER_DAY = 86_400_000;
+/** Milliseconds in one minute. */
+export const MILLISECONDS_PER_MINUTE = 60_000;

@@ -3,6 +3,7 @@ import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-wo
 import { THEME_MUTED } from "../../constants/split-view/theme-color.constant.ts";
 import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/details/elapsed-label.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
+import { formatDuration } from "../../services/time/format-duration.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
 import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
 import { inspectRequestStore } from "../../stores/inspector/inspect-request.store.ts";
@@ -67,8 +68,10 @@ export class ToolBox implements Component {
     if (timerStart.state === "absent") return this.content.lines;
 
     const displayLines = this.content.lines.filter((line) => !line.includes(ELAPSED_TIME_LABEL));
-    const elapsedSeconds = ((Date.now() - timerStart.value) / 1000).toFixed(1);
-    const timeLine = this.theme.fg(THEME_MUTED, `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
+    const timeLine = this.theme.fg(
+      THEME_MUTED,
+      `${ELAPSED_TIME_LABEL}${formatDuration(Date.now() - timerStart.value)}`,
+    );
     return [...displayLines, timeLine];
   }
 

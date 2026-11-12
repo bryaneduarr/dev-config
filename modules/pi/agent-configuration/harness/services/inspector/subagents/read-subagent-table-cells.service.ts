@@ -4,7 +4,7 @@ import { ROW_NUMBER_WIDTH } from "../../../constants/inspector/format/format.con
 import { SUBAGENT_STATUS_TEXT } from "../../../constants/inspector/labels/subagent-status.constant.ts";
 import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
 import type { SubagentTableCells } from "../../../types/inspector/lists/subagent-table-cells.interface.ts";
-import { formatDuration } from "../format/format-duration.service.ts";
+import { formatDuration } from "../../time/format-duration.service.ts";
 import { contextUsageLabel } from "../labels/context/context-usage-label.service.ts";
 import { modelShortLabel } from "../labels/model/model-short-label.service.ts";
 import { spentTokensLabel } from "../labels/usage/spent-tokens-label.service.ts";

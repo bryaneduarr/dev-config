@@ -3,11 +3,12 @@ import {
   MAX_CODEMODE_CALL_ROWS,
 } from "../../../../constants/tool-rendering/codemode/codemode-display.constant.ts";
 import type { CodemodeCall } from "../../../../types/tool-rendering/codemode/codemode-call.interface.ts";
+import { formatDuration } from "../../../time/format-duration.service.ts";
 import { displayToolName } from "./display-tool-name.service.ts";
 
 function durationLabel(call: CodemodeCall): string {
   if (call.durationMs.state === "absent") return "";
-  return ` ${(call.durationMs.value / 1000).toFixed(1)} s`;
+  return ` ${formatDuration(call.durationMs.value)}`;
 }
 
 export function codemodeCallRows(calls: readonly CodemodeCall[]): string[] {

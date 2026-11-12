@@ -7,7 +7,7 @@ import type { SubToolActivity } from "../../../../types/activity/parsing/subagen
 import type { ToolActivityUsage } from "../../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
 import type { ToolActivity } from "../../../../types/activity/store/tool-activity.interface.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
-import { formatDuration } from "../../format/format-duration.service.ts";
+import { formatDuration } from "../../../time/format-duration.service.ts";
 import { formatTime } from "../../format/format-time.service.ts";
 import { formatTokens } from "../../format/format-tokens.service.ts";
 import { contextUsageLabel } from "../../labels/context/context-usage-label.service.ts";

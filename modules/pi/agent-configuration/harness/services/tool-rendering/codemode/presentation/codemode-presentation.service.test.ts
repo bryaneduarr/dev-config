@@ -19,14 +19,14 @@ test("a finished script summarizes its calls and output without printing the out
   const text = `${header}{"title":"I want this"}\nsecond line`;
   const presentation = codemodePresentation({ code: script, calls: [notionFetch], text, state: "success" });
   expect(presentation.target).toBe("Reading notion_fetch");
-  expect(presentation.details).toEqual(["1 tool call", "✓ notion_fetch 0.5 s", "Output: 2 lines, 35 chars"]);
+  expect(presentation.details).toEqual(["1 tool call", "✓ notion_fetch 0.500s", "Output: 2 lines, 35 chars"]);
 });
 
 test("a failed script reports the reason and keeps the call rows", () => {
   const failed = { ...notionFetch, status: "error" } satisfies CodemodeCall;
   const text = "Script failed\nWall time 0.1 seconds\nOutput:\nScript error:\nTypeError: boom\n\nmore";
   const presentation = codemodePresentation({ code: "", calls: [failed], text, state: "error" });
-  expect(presentation.details).toEqual(["TypeError: boom", "✗ notion_fetch 0.5 s"]);
+  expect(presentation.details).toEqual(["TypeError: boom", "✗ notion_fetch 0.500s"]);
 });
 
 test("a script without tool calls is labeled as a plain script", () => {
